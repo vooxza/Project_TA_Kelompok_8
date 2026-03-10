@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_ta_kelompok_8/routes/pages.dart';
-import 'package:project_ta_kelompok_8/routes/routes.dart';
 
-void main() {
+import 'routes/pages.dart';
+import 'routes/routes.dart';
+
+
+void main() async {
+  
   runApp(const MyApp());
 }
 
@@ -24,4 +27,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

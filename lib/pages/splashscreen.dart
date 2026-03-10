@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -7,21 +8,15 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 3),
-      vsync: this,
-    )..addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        Navigator.pushReplacementNamed(context, '/home');
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        Get.offNamed('/startingscreen');
       }
     });
-    _controller.forward();
   }
 
   @override
@@ -78,3 +73,4 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
   }
 }
+
