@@ -3,6 +3,10 @@ import 'package:get/get.dart';
 import 'package:project_ta_kelompok_8/routes/pages.dart';
 import 'package:project_ta_kelompok_8/routes/routes.dart';
 
+void main() {
+  runApp(const MyApp());
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -15,8 +19,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      initialRoute: AppRoutes.home,
+      initialRoute: AppRoutes.splashscreen,
       getPages: AppPages.pages,
     );
   }
 }
+
