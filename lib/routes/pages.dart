@@ -1,10 +1,16 @@
 import 'package:get/get.dart';
 import 'package:project_ta_kelompok_8/pages/homepage.dart';
-import 'package:project_ta_kelompok_8/pages/startingscreen.dart';
+import 'package:project_ta_kelompok_8/pages/menu.dart';
+import 'package:project_ta_kelompok_8/pages/edit_menu.dart';
+import 'package:project_ta_kelompok_8/pages/add_menu.dart';
 import 'package:project_ta_kelompok_8/pages/splashscreen.dart';
+import 'package:project_ta_kelompok_8/pages/startingscreen.dart';
 import 'package:project_ta_kelompok_8/routes/routes.dart';
 
 import '../bindings/homepage_binding.dart';
+import '../bindings/menu_binding.dart';
+import '../bindings/edit_menu_binding.dart';
+import '../bindings/add_menu_binding.dart';
 import '../bindings/splashscreen_binding.dart';
 import '../bindings/startingscreen_binding.dart';
 
@@ -24,6 +30,21 @@ class AppPages {
       name: AppRoutes.homepage,
       page: () => HomePage(),
       binding: HomePageBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.menu,
+      page: () => MenuPage(),
+      binding: MenuBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.editMenu,
+      page: () => EditMenuPage(),
+      binding: EditMenuBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.addMenu,
+      page: () => AddMenuPage(),
+      binding: AddMenuBinding(),
     ),
   ];
 }

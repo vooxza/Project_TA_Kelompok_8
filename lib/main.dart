@@ -3,10 +3,11 @@ import 'package:get/get.dart';
 
 import 'routes/pages.dart';
 import 'routes/routes.dart';
+import 'controllers/bottomnav_controller.dart';
 
 
 void main() async {
-  
+  Get.put(BottomNavController());
   runApp(const MyApp());
 }
 
