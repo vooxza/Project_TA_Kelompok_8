@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 
-class ProductCard extends StatelessWidget {
+class ProductCard2 extends StatelessWidget {
   final String title;
   final String description;
   final String price;
+  final int quantity;
+  final VoidCallback onAdd;
+  final VoidCallback onRemove;
 
-  const ProductCard({
+  const ProductCard2({
     super.key,
     required this.title,
     required this.description,
     required this.price,
+    required this.quantity,
+    required this.onAdd,
+    required this.onRemove,
   });
 
   @override
@@ -31,18 +37,25 @@ class ProductCard extends StatelessWidget {
               child: Image.asset(
                 "assets/images/soto.jpg",
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => const Icon(Icons.fastfood, color: Colors.white, size: 50),
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.fastfood, color: Colors.white, size: 50),
               ),
             ),
           ),
+
           const SizedBox(width: 15),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 5),
                 Text(
@@ -54,11 +67,16 @@ class ProductCard extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(
                   price,
-                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
           ),
+
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
@@ -66,15 +84,24 @@ class ProductCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
-              children: const [
-                Icon(Icons.remove, color: Colors.white, size: 18),
-                SizedBox(width: 8),
-                Text("1", style: TextStyle(color: Colors.white, fontSize: 14)),
-                SizedBox(width: 8),
-                Icon(Icons.add, color: Colors.white, size: 18),
+              children: [
+                GestureDetector(
+                  onTap: onRemove,
+                  child: const Icon(Icons.remove, color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  "$quantity",
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: onAdd,
+                  child: const Icon(Icons.add, color: Colors.white, size: 18),
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

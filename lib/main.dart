@@ -4,10 +4,11 @@ import 'package:get/get.dart';
 import 'routes/pages.dart';
 import 'routes/routes.dart';
 import 'controllers/bottomnav_controller.dart';
-
+import 'controllers/cart_controller.dart';
 
 void main() async {
   Get.put(BottomNavController());
+  Get.put(CartController());
   runApp(const MyApp());
 }
 

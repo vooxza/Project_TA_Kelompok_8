@@ -41,13 +41,13 @@ class BottomNavBar extends StatelessWidget {
             },
           ),
           _buildNavItem(
-            label: "KERANJANG",
+            label: "CART",
             index: 2,
             controller: controller,
             icon: Icons.shopping_cart,
             onTap: () {
               controller.changeTab(2);
-              // Navigate to cart page when available
+              Get.offNamed(AppRoutes.cart);
             },
           ),
         ],

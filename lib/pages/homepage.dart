@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../routes/routes.dart';
 import '../widgets/index.dart';
 
 class HomePage extends StatelessWidget {
@@ -40,11 +42,16 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 15),
-                    const Icon(
-                      Icons.account_circle_outlined,
-                      size: 40,
-                      color: Colors.white,
-                    )
+                    IconButton(
+                      onPressed: () => 
+                        Get.toNamed(AppRoutes.profile)
+                      ,
+                      icon: const Icon(
+                        Icons.account_circle_outlined,
+                        size: 40,
+                        color: Colors.white,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 25),
@@ -82,7 +89,10 @@ class HomePage extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         "Paket Terlaris!",
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -119,7 +129,10 @@ class HomePage extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         "Kategori",
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -140,25 +153,49 @@ class HomePage extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         "Menu Populer",
-                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 15),
-                  
+
                   /// SCROLLABLE MENU CARDS
                   SizedBox(
                     height: 350,
                     child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
                         children: [
-                          ProductCard(title: "Soto Ayam Spesial", description: "Soto ayam spesial khas dari Mbok Kerso", price: "Rp 15.000"),
+                          ProductCard(
+                            title: "Soto Ayam Spesial",
+                            description:
+                                "Soto ayam spesial khas dari Mbok Kerso",
+                            price: "Rp 15.000",
+                          ),
                           const SizedBox(height: 15),
-                          ProductCard(title: "Soto Ayam Spesial", description: "Soto ayam spesial khas dari Mbok Kerso", price: "Rp 15.000"),
+                          ProductCard(
+                            title: "Soto Ayam Spesial",
+                            description:
+                                "Soto ayam spesial khas dari Mbok Kerso",
+                            price: "Rp 15.000",
+                          ),
                           const SizedBox(height: 15),
-                          ProductCard(title: "Soto Ayam Spesial", description: "Soto ayam spesial khas dari Mbok Kerso", price: "Rp 15.000"),
+                          ProductCard(
+                            title: "Soto Ayam Spesial",
+                            description:
+                                "Soto ayam spesial khas dari Mbok Kerso",
+                            price: "Rp 15.000",
+                          ),
                           const SizedBox(height: 15),
-                          ProductCard(title: "Soto Ayam Spesial", description: "Soto ayam spesial khas dari Mbok Kerso", price: "Rp 15.000"),
+                          ProductCard(
+                            title: "Soto Ayam Spesial",
+                            description:
+                                "Soto ayam spesial khas dari Mbok Kerso",
+                            price: "Rp 15.000",
+                          ),
                         ],
                       ),
                     ),

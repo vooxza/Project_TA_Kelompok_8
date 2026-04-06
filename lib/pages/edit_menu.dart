@@ -16,9 +16,13 @@ class EditMenuPage extends StatelessWidget {
         elevation: 0,
         leading: const SizedBox(),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            bottom: MediaQuery.of(context).padding.bottom + 30,
+          ),
           child: Column(
             children: [
               const SizedBox(height: 20),
@@ -27,6 +31,7 @@ class EditMenuPage extends StatelessWidget {
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 30),
+
               Container(
                 height: 200,
                 decoration: BoxDecoration(
@@ -53,10 +58,11 @@ class EditMenuPage extends StatelessWidget {
                   ),
                 ),
               ),
+
               const SizedBox(height: 20),
+
               GestureDetector(
                 onTap: () {
-                  // Image picker logic here
                   controller.changeImage('path/to/image');
                 },
                 child: Container(
@@ -78,27 +84,35 @@ class EditMenuPage extends StatelessWidget {
                   ),
                 ),
               ),
+
               const SizedBox(height: 30),
+
               _buildInputField(
                 controller: controller.nameController,
                 label: 'Nama',
                 hint: 'Nama menu...',
               ),
+
               const SizedBox(height: 15),
+
               _buildInputField(
                 controller: controller.stockController,
                 label: 'Stok',
                 hint: 'Jumlah stok...',
                 keyboardType: TextInputType.number,
               ),
+
               const SizedBox(height: 15),
+
               _buildInputField(
                 controller: controller.descriptionController,
                 label: 'Deskripsi',
                 hint: 'Deskripsi menu...',
                 maxLines: 3,
               ),
+
               const SizedBox(height: 30),
+
               GestureDetector(
                 onTap: () => controller.saveMenu(),
                 child: Container(
@@ -120,7 +134,30 @@ class EditMenuPage extends StatelessWidget {
                   ),
                 ),
               ),
+
               const SizedBox(height: 30),
+
+              GestureDetector(
+                onTap: () => controller.deleteMenu(),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Hapus Menu',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -148,10 +185,7 @@ class EditMenuPage extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
             boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 5,
-              ),
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5),
             ],
           ),
           child: TextField(
