@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide MenuController;
 import 'package:get/get.dart';
 import '../routes/routes.dart';
 import '../controllers/menu_controller.dart';
+import '../controllers/cart_controller.dart';
 import '../widgets/bottom_nav_bar.dart';
 
 class MenuPage extends StatelessWidget {
@@ -10,6 +11,7 @@ class MenuPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MenuController controller = Get.put(MenuController());
+    final CartController cartController = Get.find<CartController>();
 
     return Scaffold(
       backgroundColor: Colors.grey[200],
@@ -54,7 +56,12 @@ class MenuPage extends StatelessWidget {
                   itemCount: controller.menuItems.length,
                   itemBuilder: (context, index) {
                     final item = controller.menuItems[index];
-                    return _buildMenuCard(context, item, controller);
+                    return _buildMenuCard(
+                      context,
+                      item,
+                      controller,
+                      cartController,
+                    );
                   },
                 ),
               ),
@@ -67,6 +74,7 @@ class MenuPage extends StatelessWidget {
     BuildContext context,
     MenuItem item,
     MenuController controller,
+    CartController cartController,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -102,6 +110,8 @@ class MenuPage extends StatelessWidget {
                     ),
                   ),
                 ),
+
+                /// tombol edit
                 Positioned(
                   top: 8,
                   right: 8,
@@ -130,6 +140,7 @@ class MenuPage extends StatelessWidget {
               ],
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             child: Column(
@@ -156,6 +167,7 @@ class MenuPage extends StatelessWidget {
               ],
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             child: Row(
@@ -171,30 +183,19 @@ class MenuPage extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+
+                /// tombol add to cart
                 GestureDetector(
                   onTap: () {
-                    Get.dialog(
-                      AlertDialog(
-                        title: const Text('Hapus Item'),
-                        content:
-                            const Text('Apakah Anda yakin ingin menghapus item ini?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Get.back(),
-                            child: const Text('Batal'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              controller.deleteMenuItem(item.id);
-                              Get.back();
-                            },
-                            child: const Text(
-                              'Hapus',
-                              style: TextStyle(color: Color(0xFFB71C1C)),
-                            ),
-                          ),
-                        ],
-                      ),
+                    cartController.addToCart(item);
+
+                    Get.snackbar(
+                      "Berhasil",
+                      "${item.name} ditambahkan ke keranjang",
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: const Color(0xFFB71C1C),
+                      colorText: Colors.white,
+                      margin: const EdgeInsets.all(12),
                     );
                   },
                   child: Container(
@@ -203,8 +204,11 @@ class MenuPage extends StatelessWidget {
                       borderRadius: BorderRadius.all(Radius.circular(6)),
                     ),
                     padding: const EdgeInsets.all(6),
-                    child:
-                        const Icon(Icons.shopping_cart, color: Colors.white, size: 16),
+                    child: const Icon(
+                      Icons.shopping_cart,
+                      color: Colors.white,
+                      size: 16,
+                    ),
                   ),
                 ),
               ],
@@ -215,5 +219,3 @@ class MenuPage extends StatelessWidget {
     );
   }
 }
-
-
