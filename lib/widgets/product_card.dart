@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/colors.dart';
 
 class ProductCard extends StatelessWidget {
   final String title;
@@ -17,7 +18,7 @@ class ProductCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: const Color(0xFFB71C1C),
+        color: AppColors.primaryRed,
         borderRadius: BorderRadius.circular(25),
       ),
       child: Row(
@@ -31,7 +32,11 @@ class ProductCard extends StatelessWidget {
               child: Image.asset(
                 "assets/images/soto.jpg",
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => const Icon(Icons.fastfood, color: Colors.white, size: 50),
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.fastfood,
+                  color: AppColors.textWhite,
+                  size: 50,
+                ),
               ),
             ),
           ),
@@ -42,19 +47,30 @@ class ProductCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: AppColors.textWhite,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 5),
                 Text(
                   description,
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  style: const TextStyle(
+                    color: Color(0xB2FFFFFF),
+                    fontSize: 12,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 10),
                 Text(
                   price,
-                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: AppColors.textWhite,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -62,16 +78,22 @@ class ProductCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.red[300],
+              color: AppColors.accentRedLight,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
               children: const [
-                Icon(Icons.remove, color: Colors.white, size: 18),
+                Icon(Icons.remove, color: AppColors.textWhite, size: 18),
                 SizedBox(width: 8),
-                Text("1", style: TextStyle(color: Colors.white, fontSize: 14)),
+                Text(
+                  "1",
+                  style: TextStyle(
+                    color: AppColors.textWhite,
+                    fontSize: 14,
+                  ),
+                ),
                 SizedBox(width: 8),
-                Icon(Icons.add, color: Colors.white, size: 18),
+                Icon(Icons.add, color: AppColors.textWhite, size: 18),
               ],
             ),
           )

@@ -1,28 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'homepage.dart';
+import '../theme/colors.dart';
+import '../routes/routes.dart';
+import '../controllers/profile_controller.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final ProfileController controller = Get.put(ProfileController());
+
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: AppColors.bgGrey,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFB71C1C),
+        backgroundColor: AppColors.primaryRed,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textWhite),
           onPressed: () {
-            Get.off((() => const HomePage()));
+            Get.offNamed(AppRoutes.homepage);
           },
         ),
         title: const Text(
           "Profile",
           style: TextStyle(
-            color: Colors.white,
+            color: AppColors.textWhite,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -43,7 +47,7 @@ class ProfilePage extends StatelessWidget {
                     width: 180,
                     height: 180,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.textWhite,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: Colors.grey.shade500,
@@ -68,35 +72,44 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 25),
 
                 /// NAMA USER
-                const Text(
-                  "USER",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
+                Obx(
+                  () => Text(
+                    controller.userName.value,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
                   ),
                 ),
 
                 const SizedBox(height: 40),
 
-                profileCard(
-                  icon: Icons.person,
-                  title: "Nama",
-                  value: "User Dummy",
+                /// PROFILE CARDS
+                Obx(
+                  () => profileCard(
+                    icon: Icons.person,
+                    title: "Nama",
+                    value: controller.userName.value,
+                  ),
                 ),
                 const SizedBox(height: 15),
 
-                profileCard(
-                  icon: Icons.email,
-                  title: "Email",
-                  value: "user@gmail.com",
+                Obx(
+                  () => profileCard(
+                    icon: Icons.email,
+                    title: "Email",
+                    value: controller.userEmail.value,
+                  ),
                 ),
                 const SizedBox(height: 15),
 
-                profileCard(
-                  icon: Icons.phone,
-                  title: "No. HP",
-                  value: "08xxxxxxxxxx",
+                Obx(
+                  () => profileCard(
+                    icon: Icons.phone,
+                    title: "No. HP",
+                    value: controller.userPhone.value,
+                  ),
                 ),
 
                 const SizedBox(height: 40),
@@ -106,16 +119,18 @@ class ProfilePage extends StatelessWidget {
                   height: 55,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFB71C1C),
+                      backgroundColor: AppColors.primaryRed,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      controller.logout();
+                    },
                     child: const Text(
                       "LOGOUT",
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppColors.textWhite,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -141,7 +156,7 @@ class ProfilePage extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.textWhite,
         borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
@@ -153,7 +168,7 @@ class ProfilePage extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFFB71C1C), size: 28),
+          Icon(icon, color: AppColors.primaryRed, size: 28),
           const SizedBox(width: 15),
           Expanded(
             child: Column(

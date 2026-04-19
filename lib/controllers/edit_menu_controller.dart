@@ -1,35 +1,35 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide MenuController;
 import 'package:get/get.dart';
-import '../controllers/menu_controller.dart' as my_menu;
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import '../controllers/menu_controller.dart';
 import '../widgets/dialog_button.dart';
+import 'package:project_ta_kelompok_8/models/product_model.dart';
 
 class EditMenuController extends GetxController {
   late TextEditingController nameController;
-  late TextEditingController stockController;
-  late TextEditingController descriptionController;
+  late TextEditingController priceController;
 
   var selectedImage = Rxn<String>();
+  final ImagePicker imagePicker = ImagePicker();
 
-  final my_menu.MenuController menuController =
-      Get.find<my_menu.MenuController>();
+  final menuController = Get.find<MenuController>();
 
-  String? menuId;
+  int? menuId;
 
   @override
   void onInit() {
     super.onInit();
 
     nameController = TextEditingController();
-    stockController = TextEditingController();
-    descriptionController = TextEditingController();
+    priceController = TextEditingController();
 
     final args = Get.arguments;
 
     if (args != null) {
-      menuId = args['id'];
+      menuId = args['id'] as int?;
       nameController.text = args['name'] ?? '';
-      stockController.text = args['stock']?.toString() ?? '';
-      descriptionController.text = args['description'] ?? '';
+      priceController.text = args['price']?.toString() ?? '';
       selectedImage.value = args['image'];
     }
   }
@@ -37,8 +37,7 @@ class EditMenuController extends GetxController {
   @override
   void onClose() {
     nameController.dispose();
-    stockController.dispose();
-    descriptionController.dispose();
+    priceController.dispose();
     super.onClose();
   }
 
@@ -46,11 +45,44 @@ class EditMenuController extends GetxController {
     selectedImage.value = imagePath;
   }
 
-  void saveMenu() {
-    if (nameController.text.isEmpty || stockController.text.isEmpty) {
+  Future<void> pickImageFromGallery() async {
+    try {
+      final status = await Permission.photos.request();
+
+      if (status.isGranted) {
+        final XFile? pickedFile = await imagePicker.pickImage(
+          source: ImageSource.gallery,
+          imageQuality: 80,
+        );
+        if (pickedFile != null) {
+          selectedImage.value = pickedFile.path;
+          Get.snackbar('Success', 'Image selected',
+              snackPosition: SnackPosition.BOTTOM);
+        }
+      } else if (status.isDenied) {
+        Get.snackbar('Permission Denied', 'Gallery access required');
+      } else if (status.isPermanentlyDenied) {
+        Get.snackbar(
+          'Permission Required',
+          'Please enable gallery access in settings',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
       Get.snackbar(
         'Error',
-        'Nama dan Stok tidak boleh kosong',
+        'Failed to select image: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+      );
+    }
+  }
+
+  void saveMenu() {
+    if (nameController.text.isEmpty || priceController.text.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Name and Price cannot be empty',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFB71C1C),
         colorText: Colors.white,
@@ -59,24 +91,34 @@ class EditMenuController extends GetxController {
       return;
     }
 
-    final updatedItem = my_menu.MenuItem(
-      id: menuId ?? DateTime.now().toString(),
-      name: nameController.text,
-      description: descriptionController.text,
-      image: selectedImage.value ?? '',
-      stock: int.tryParse(stockController.text) ?? 0,
-      price: 'Rp 0',
-    );
+    final price = double.tryParse(priceController.text) ?? 0.0;
 
     if (menuId != null) {
-      menuController.updateMenuItem(updatedItem);
+      final updatedProduct = Product(
+        id: menuId,
+        name: nameController.text,
+        description: null,
+        image: selectedImage.value,
+        stock: 0,
+        price: price,
+        categoryId: 1,
+      );
+      menuController.updateMenuItem(updatedProduct);
     } else {
-      menuController.addMenuItem(updatedItem);
+      final newProduct = Product(
+        name: nameController.text,
+        description: null,
+        image: selectedImage.value,
+        stock: 0,
+        price: price,
+        categoryId: 1,
+      );
+      menuController.addMenuItem(newProduct);
     }
 
     Get.snackbar(
-      'Sukses',
-      'Menu berhasil disimpan',
+      'Success',
+      'Menu telah disimpan',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: const Color(0xFFB71C1C),
       colorText: Colors.white,
@@ -91,18 +133,16 @@ class EditMenuController extends GetxController {
 
     Get.dialog(
       CustomDialog(
-        title: "Konfirmasi",
-        message: "Yakin ingin menghapus menu ini?",
+        title: "Confirm",
+        message: "Anda yakin ingin menghapus menu ini?",
         textCancel: "Batal",
         textConfirm: "Hapus",
         buttonColor: const Color(0xFFB71C1C),
         onConfirm: () {
           menuController.deleteMenuItem(menuId!);
-
-          Get.back(); // kembali ke halaman menu
-
+          Get.back();
           Get.snackbar(
-            'Sukses',
+            'Success',
             'Menu berhasil dihapus',
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: const Color(0xFFB71C1C),
@@ -110,6 +150,7 @@ class EditMenuController extends GetxController {
             margin: const EdgeInsets.all(12),
           );
         },
+        onCancel: () => Get.back(),
       ),
     );
   }

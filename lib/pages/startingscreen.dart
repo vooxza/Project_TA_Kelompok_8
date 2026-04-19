@@ -30,7 +30,7 @@ class StartingScreen extends StatelessWidget {
                   "Soto Ayam\nMbok Kerso",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: 48,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                     shadows: [

@@ -1,43 +1,46 @@
 import 'package:get/get.dart';
-import 'menu_controller.dart';
+import 'package:project_ta_kelompok_8/models/product_model.dart';
+import 'package:project_ta_kelompok_8/services/api_service.dart';
 
 class CartItemModel {
-  final MenuItem menuItem;
+  final Product product;
   RxInt quantity;
 
-  CartItemModel({required this.menuItem, required int quantity})
-    : quantity = quantity.obs;
+  CartItemModel({required this.product, required int quantity})
+      : quantity = quantity.obs;
 }
 
 class CartController extends GetxController {
   var cartItems = <CartItemModel>[].obs;
   var selectedTable = RxnString();
+  var isLoading = false.obs;
+  final apiService = ApiService();
 
-  /// Tambah ke keranjang
-  void addToCart(MenuItem item) {
-    final index = cartItems.indexWhere((cart) => cart.menuItem.id == item.id);
+  /// Add to cart
+  void addToCart(Product item) {
+    final index = cartItems.indexWhere((cart) => cart.product.id == item.id);
 
     if (index != -1) {
       cartItems[index].quantity.value++;
     } else {
-      cartItems.add(CartItemModel(menuItem: item, quantity: 1));
+      cartItems.add(CartItemModel(product: item, quantity: 1));
     }
 
     cartItems.refresh();
   }
 
-  /// Tambah quantity
-  void incrementQuantity(String itemId) {
-    final index = cartItems.indexWhere((cart) => cart.menuItem.id == itemId);
+  /// Increase quantity
+  void incrementQuantity(int productId) {
+    final index = cartItems.indexWhere((cart) => cart.product.id == productId);
     if (index != -1) {
       cartItems[index].quantity.value++;
       cartItems.refresh();
     }
   }
 
-  /// Kurang quantity
-  void decrementQuantity(String itemId) {
-    final index = cartItems.indexWhere((cart) => cart.menuItem.id == itemId);
+  /// Decrease quantity
+  void decrementQuantity(int productId) {
+    final index = cartItems.indexWhere((cart) => cart.product.id == productId);
 
     if (index != -1) {
       if (cartItems[index].quantity.value > 1) {
@@ -49,31 +52,59 @@ class CartController extends GetxController {
     }
   }
 
-  /// Hapus item langsung
-  void removeFromCart(String itemId) {
-    cartItems.removeWhere((cart) => cart.menuItem.id == itemId);
+  /// Remove item directly
+  void removeFromCart(int productId) {
+    cartItems.removeWhere((cart) => cart.product.id == productId);
   }
 
-  /// Convert "Rp 15.000" -> 15000
-  int parsePrice(String price) {
-    return int.parse(
-      price.replaceAll('Rp', '').replaceAll('.', '').replaceAll(' ', ''),
-    );
-  }
-
-  /// Total harga
-  int get totalPrice {
-    return cartItems.fold(0, (sum, item) {
-      return sum + (parsePrice(item.menuItem.price) * item.quantity.value);
+  /// Total price
+  double get totalPrice {
+    return cartItems.fold(0.0, (sum, item) {
+      return sum + (item.product.price * item.quantity.value);
     });
   }
 
   /// Format rupiah
-  String formatRupiah(int amount) {
-    String result = amount.toString();
+  String formatRupiah(double amount) {
+    final amountInt = amount.toInt();
+    String result = amountInt.toString();
     final reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
     result = result.replaceAllMapped(reg, (Match m) => '${m[1]}.');
     return 'Rp $result';
+  }
+
+  /// Create order from cart
+  Future<void> checkout(int userId) async {
+    try {
+      if (cartItems.isEmpty) {
+        Get.snackbar('Error', 'Cart is empty');
+        return;
+      }
+
+      isLoading.value = true;
+
+      final items = cartItems
+          .map((item) => {
+                'productId': item.product.id,
+                'quantity': item.quantity.value,
+                'price': item.product.price,
+              })
+          .toList();
+
+      final order = await apiService.createOrder(
+        userId,
+        totalPrice,
+        items,
+      );
+
+      clearCart();
+      Get.snackbar('Success', 'Order created successfully: ${order.orderNumber}');
+      Get.offNamed('/order-confirmation', arguments: order);
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to create order: $e');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void clearCart() {

@@ -10,7 +10,7 @@ class MenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MenuController controller = Get.put(MenuController());
+    final MenuController controller = Get.find<MenuController>();
     final CartController cartController = Get.find<CartController>();
 
     return Scaffold(
@@ -42,29 +42,65 @@ class MenuPage extends StatelessWidget {
         ],
       ),
       body: Obx(
-        () => controller.isLoading.value
-            ? const Center(child: CircularProgressIndicator())
-            : Padding(
-                padding: const EdgeInsets.all(15),
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.85,
-                    crossAxisSpacing: 15,
-                    mainAxisSpacing: 15,
-                  ),
-                  itemCount: controller.menuItems.length,
-                  itemBuilder: (context, index) {
-                    final item = controller.menuItems[index];
-                    return _buildMenuCard(
-                      context,
-                      item,
-                      controller,
-                      cartController,
-                    );
-                  },
+        () => RefreshIndicator(
+          onRefresh: () => controller.refreshMenuItems(),
+          backgroundColor: const Color(0xFFB71C1C),
+          color: Colors.white,
+          child: controller.isLoading.value
+              ? const Center(child: CircularProgressIndicator())
+              : Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: controller.menuItems.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.restaurant_menu,
+                                size: 80,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'No menu items available',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Pull to refresh',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.85,
+                            crossAxisSpacing: 15,
+                            mainAxisSpacing: 15,
+                          ),
+                          itemCount: controller.menuItems.length,
+                          itemBuilder: (context, index) {
+                            final item = controller.menuItems[index];
+                            return _buildMenuCard(
+                              context,
+                              item,
+                              controller,
+                              cartController,
+                            );
+                          },
+                        ),
                 ),
-              ),
+        ),
       ),
       bottomNavigationBar: const BottomNavBar(),
     );
@@ -72,46 +108,53 @@ class MenuPage extends StatelessWidget {
 
   Widget _buildMenuCard(
     BuildContext context,
-    MenuItem item,
+    item,
     MenuController controller,
     CartController cartController,
   ) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[300]!, width: 2),
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          Expanded(
+          // Image Section with Edit Button
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(15),
+              topRight: Radius.circular(15),
+            ),
             child: Stack(
               children: [
                 Container(
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(18),
-                      topRight: Radius.circular(18),
-                    ),
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.image,
-                        size: 40,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
+                  width: double.infinity,
+                  height: 120,
+                  color: Colors.grey[200],
+                  child: item.image != null && item.image!.isNotEmpty
+                      ? Image.network(
+                          item.image!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => const Icon(
+                            Icons.fastfood,
+                            color: Colors.grey,
+                            size: 40,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.fastfood,
+                          color: Colors.grey,
+                          size: 40,
+                        ),
                 ),
-
-                /// tombol edit
+                // Edit Button
                 Positioned(
                   top: 8,
                   right: 8,
@@ -121,14 +164,13 @@ class MenuPage extends StatelessWidget {
                       borderRadius: BorderRadius.all(Radius.circular(6)),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.white, size: 18),
+                      icon: const Icon(Icons.edit, color: Colors.white, size: 16),
                       onPressed: () => Get.toNamed(
                         AppRoutes.editMenu,
                         arguments: {
                           'id': item.id,
                           'name': item.name,
-                          'description': item.description,
-                          'stock': item.stock,
+                          'price': item.price,
                           'image': item.image,
                         },
                       ),
@@ -140,78 +182,74 @@ class MenuPage extends StatelessWidget {
               ],
             ),
           ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  item.description,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    item.price,
+          // Info Section
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.name,
                     style: const TextStyle(
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      color: Colors.black,
                     ),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ),
-
-                /// tombol add to cart
-                GestureDetector(
-                  onTap: () {
-                    cartController.addToCart(item);
-
-                    Get.snackbar(
-                      "Berhasil",
-                      "${item.name} ditambahkan ke keranjang",
-                      snackPosition: SnackPosition.BOTTOM,
-                      backgroundColor: const Color(0xFFB71C1C),
-                      colorText: Colors.white,
-                      margin: const EdgeInsets.all(12),
-                    );
-                  },
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFB71C1C),
-                      borderRadius: BorderRadius.all(Radius.circular(6)),
+                  const SizedBox(height: 4),
+                  Text(
+                    item.description ?? '',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey[600],
                     ),
-                    padding: const EdgeInsets.all(6),
-                    child: const Icon(
-                      Icons.shopping_cart,
-                      color: Colors.white,
-                      size: 16,
-                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Rp ${item.price.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFB71C1C),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          cartController.addToCart(item);
+                          Get.snackbar(
+                            'Berhasil',
+                            '${item.name} ditambahkan ke keranjang',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: const Color(0xFFB71C1C),
+                            colorText: Colors.white,
+                            margin: const EdgeInsets.all(12),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFB71C1C),
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],

@@ -65,18 +65,18 @@ class CartPage extends StatelessWidget {
 
                             return Obx(
                               () => ProductCard2(
-                                title: cartItem.menuItem.name,
-                                description: cartItem.menuItem.description,
-                                price: cartItem.menuItem.price,
+                                title: cartItem.product.name,
+                                description: cartItem.product.description ?? '',
+                                price: cartItem.product.price.toStringAsFixed(0),
                                 quantity: cartItem.quantity.value,
                                 onAdd: () {
                                   cartController.incrementQuantity(
-                                    cartItem.menuItem.id,
+                                    cartItem.product.id ?? 0,
                                   );
                                 },
                                 onRemove: () {
                                   cartController.decrementQuantity(
-                                    cartItem.menuItem.id,
+                                    cartItem.product.id ?? 0,
                                   );
                                 },
                               ),

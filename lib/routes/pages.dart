@@ -24,44 +24,53 @@ class AppPages {
       name: AppRoutes.splashscreen,
       page: () => SplashScreen(),
       binding: SplashScreenBinding(),
+      transition: Transition.fadeIn,
     ),
     GetPage(
       name: AppRoutes.start,
       page: () => StartingScreen(),
       binding: StartingScreenBinding(),
+      transition: Transition.fadeIn,
     ),
     GetPage(
       name: AppRoutes.homepage,
       page: () => HomePage(),
       binding: HomePageBinding(),
+      transition: Transition.fadeIn,
     ),
     GetPage(
       name: AppRoutes.menu,
       page: () => MenuPage(),
       binding: MenuBinding(),
+      transition: Transition.fadeIn,
     ),
     GetPage(
       name: AppRoutes.editMenu,
       page: () => EditMenuPage(),
       binding: EditMenuBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: AppRoutes.addMenu,
       page: () => AddMenuPage(),
       binding: AddMenuBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: AppRoutes.cart,
       page: () => CartPage(),
       binding: CartBinding(),
+      transition: Transition.fadeIn,
     ),
     GetPage(
       name: AppRoutes.payment,
       page: () => PaymentPage(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: AppRoutes.profile,
       page: () => ProfilePage(),
+      transition: Transition.rightToLeft,
     )
   ];
 }
