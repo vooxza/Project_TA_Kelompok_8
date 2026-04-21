@@ -25,7 +25,7 @@ class MenuController extends GetxController {
 
   Future<void> loadMenuItems() async {
     try {
-      isLoading.value = true;
+      isLoading.value = true; 
       errorMessage.value = '';
       final products = await apiService.getProducts();
       menuItems.value = products;
@@ -48,6 +48,7 @@ class MenuController extends GetxController {
 
   Future<void> refreshMenuItems() async {
     try {
+      isLoading.value = true;
       final products = await apiService.getProducts();
       menuItems.value = products;
       errorMessage.value = '';
