@@ -4,6 +4,7 @@ import '../routes/routes.dart';
 import '../controllers/menu_controller.dart';
 import '../controllers/cart_controller.dart';
 import '../widgets/bottom_nav_bar.dart';
+import '../services/api_service.dart';
 
 class MenuPage extends StatelessWidget {
   const MenuPage({super.key});
@@ -83,11 +84,11 @@ class MenuPage extends StatelessWidget {
                       : GridView.builder(
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.85,
-                            crossAxisSpacing: 15,
-                            mainAxisSpacing: 15,
-                          ),
+                                crossAxisCount: 2,
+                                childAspectRatio: 0.85,
+                                crossAxisSpacing: 15,
+                                mainAxisSpacing: 15,
+                              ),
                           itemCount: controller.menuItems.length,
                           itemBuilder: (context, index) {
                             final item = controller.menuItems[index];
@@ -140,13 +141,10 @@ class MenuPage extends StatelessWidget {
                   color: Colors.grey[200],
                   child: item.image != null && item.image!.isNotEmpty
                       ? Image.network(
-                          item.image!,
+                          item.image!.startsWith('http')
+                              ? item.image!
+                              : '${ApiService.baseUrl.replaceAll('/api', '')}${item.image}',
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => const Icon(
-                            Icons.fastfood,
-                            color: Colors.grey,
-                            size: 40,
-                          ),
                         )
                       : const Icon(
                           Icons.fastfood,
@@ -164,7 +162,11 @@ class MenuPage extends StatelessWidget {
                       borderRadius: BorderRadius.all(Radius.circular(6)),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.white, size: 16),
+                      icon: const Icon(
+                        Icons.edit,
+                        color: Colors.white,
+                        size: 16,
+                      ),
                       onPressed: () => Get.toNamed(
                         AppRoutes.editMenu,
                         arguments: {
@@ -202,10 +204,7 @@ class MenuPage extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     item.description ?? '',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 11, color: Colors.grey[600]),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

@@ -21,7 +21,7 @@ class BottomNavBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildNavItem(
-  label: "BERANDA",
+  label: "HOME",
   index: 0,
   controller: controller,
   icon: Icons.home,
