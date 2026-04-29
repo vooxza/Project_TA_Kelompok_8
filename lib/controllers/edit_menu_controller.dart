@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../controllers/menu_controller.dart';
 import '../widgets/dialog_button.dart';
-import 'package:project_ta_kelompok_8/models/product_model.dart';
+import '../models/category_model.dart';
 
 class EditMenuController extends GetxController {
   late TextEditingController nameController;
@@ -13,6 +13,9 @@ class EditMenuController extends GetxController {
 
   var selectedImage = Rxn<String>();
   final ImagePicker imagePicker = ImagePicker();
+
+  var selectedCategoryId = Rxn<int>();
+  var categories = <Category>[].obs;
 
   final menuController = Get.find<MenuController>();
 
@@ -30,9 +33,11 @@ class EditMenuController extends GetxController {
     if (args != null) {
       menuId = args['id'] as int?;
       nameController.text = args['name'] ?? '';
+      selectedCategoryId.value = args['category_id'];
       priceController.text = args['price']?.toString() ?? '';
       selectedImage.value = args['image'];
     }
+    loadCategories();
   }
 
   @override
@@ -46,11 +51,16 @@ class EditMenuController extends GetxController {
     selectedImage.value = imagePath;
   }
 
+  Future<void> loadCategories() async {
+    final result = await menuController.apiService.getCategories();
+    categories.value = result;
+  }
+
   Future<void> pickImageFromGallery() async {
     try {
       final status = Platform.isAndroid
-    ? await Permission.storage.request()
-    : await Permission.photos.request();
+          ? await Permission.storage.request()
+          : await Permission.photos.request();
 
       if (status.isGranted) {
         final XFile? pickedFile = await imagePicker.pickImage(
@@ -92,6 +102,13 @@ class EditMenuController extends GetxController {
 
     final price = double.tryParse(priceController.text) ?? 0.0;
 
+    File? imageFile;
+
+    if (selectedImage.value != null &&
+        !selectedImage.value!.startsWith('http')) {
+      imageFile = File(selectedImage.value!);
+    }
+
     try {
       if (menuId != null) {
         await menuController.apiService.updateProductWithImage(
@@ -99,8 +116,8 @@ class EditMenuController extends GetxController {
           nameController.text,
           price,
           0,
-          1,
-          selectedImage.value != null ? File(selectedImage.value!) : null,
+          selectedCategoryId.value!,
+          imageFile,
         );
       }
 

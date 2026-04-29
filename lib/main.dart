@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'routes/pages.dart';
 import 'routes/routes.dart';
+import 'theme/app_theme.dart';
 import 'controllers/bottomnav_controller.dart';
 import 'controllers/cart_controller.dart';
 
@@ -19,11 +19,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-        useMaterial3: true,
-      ),
+      title: 'Soto Mbok Kerso',
+      theme: AppTheme.lightTheme,
       initialRoute: AppRoutes.splashscreen,
       getPages: AppPages.pages,
     );

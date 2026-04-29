@@ -1,11 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:project_ta_kelompok_8/models/product_model.dart';
+import 'package:project_ta_kelompok_8/models/category_model.dart' as cat;
 import 'package:project_ta_kelompok_8/services/api_service.dart';
 
 class MenuController extends GetxController {
   var menuItems = <Product>[].obs;
   var isLoading = false.obs;
+
+  var categories = <cat.Category>[].obs;
+  var selectedCategoryId = Rxn<int>();
+
   var errorMessage = ''.obs;
   final apiService = ApiService();
   var _isInitialized = false;
@@ -13,8 +18,8 @@ class MenuController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Load data from API immediately on init
     ensureLoaded();
+    loadCategories();
   }
 
   Future<void> ensureLoaded() async {
@@ -23,105 +28,68 @@ class MenuController extends GetxController {
     await loadMenuItems();
   }
 
+  // 🔥 FILTER
+  List<Product> get filteredMenu {
+    if (selectedCategoryId.value == null) return menuItems;
+
+    return menuItems
+        .where((item) => item.categoryId == selectedCategoryId.value)
+        .toList();
+  }
+
+  Future<void> loadCategories() async {
+    try {
+      final result = await apiService.getCategories();
+      categories.value = result;
+
+      if (categories.isNotEmpty) {
+        selectedCategoryId.value = categories.first.id;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal load category');
+    }
+  }
+
   Future<void> loadMenuItems() async {
     try {
-      isLoading.value = true; 
-      errorMessage.value = '';
+      isLoading.value = true;
       final products = await apiService.getProducts();
       menuItems.value = products;
-      errorMessage.value = '';
     } catch (e) {
-      errorMessage.value = e.toString();
-      debugPrint('Error loading menu items: $e');
-      // Show error but don't show fallback mock data
+      debugPrint('Error: $e');
       menuItems.value = [];
-      Get.snackbar(
-        'Error',
-        'Failed to load menu items from server',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 3),
-      );
     } finally {
       isLoading.value = false;
     }
   }
 
   Future<void> refreshMenuItems() async {
-    try {
-      isLoading.value = true;
-      final products = await apiService.getProducts();
-      menuItems.value = products;
-      errorMessage.value = '';
-      Get.snackbar(
-        'Success',
-        'Menu refreshed',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
-      );
-    } catch (e) {
-      errorMessage.value = e.toString();
-      debugPrint('Error refreshing menu items: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to refresh menu',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 3),
-      );
-    }
+    await loadMenuItems();
   }
 
-
   Future<void> deleteMenuItem(int id) async {
-    try {
-      isLoading.value = true;
-      await apiService.deleteProduct(id);
-      menuItems.removeWhere((item) => item.id == id);
-      Get.snackbar('Success', 'Menu item deleted successfully');
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to delete: $e');
-    } finally {
-      isLoading.value = false;
-    }
+    await apiService.deleteProduct(id);
+    await loadMenuItems();
   }
 
   Future<void> addMenuItem(Product item) async {
-    try {
-      isLoading.value = true;
-      await apiService.createProduct(
-        item.name,
-        item.price,
-        item.stock,
-        item.categoryId,
-        description: item.description,
-        image: item.image,
-      );
-      await loadMenuItems(); // Refresh the list
-      Get.snackbar('Success', 'Menu item added successfully');
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to add item: $e');
-    } finally {
-      isLoading.value = false;
-    }
+    await apiService.createProduct(
+      item.name,
+      item.price,
+      item.stock,
+      item.categoryId,
+    );
+    await loadMenuItems();
   }
 
   Future<void> updateMenuItem(Product item) async {
-    try {
-      isLoading.value = true;
-      await apiService.updateProduct(
-        item.id ?? 0,
-        item.name,
-        item.price,
-        item.stock,
-        item.categoryId,
-        description: item.description,
-        image: item.image,
-      );
-      await loadMenuItems(); // Refresh the list
-      Get.snackbar('Success', 'Menu item updated successfully');
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to update item: $e');
-    } finally {
-      isLoading.value = false;
-    }
+    await apiService.updateProduct(
+      item.id ?? 0,
+      item.name,
+      item.price,
+      item.stock,
+      item.categoryId,
+    );
+    await loadMenuItems();
   }
 }
