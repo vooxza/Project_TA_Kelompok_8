@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'menu_controller.dart' as menu;
@@ -15,7 +16,7 @@ class AddMenuController extends GetxController {
   var selectedCategoryId = Rxn<int>();
   var categories = <Category>[].obs;
   var isLoading = false.obs;
-  
+
   final menuController = Get.find<menu.MenuController>();
   final apiService = ApiService();
   final ImagePicker imagePicker = ImagePicker();
@@ -55,7 +56,9 @@ class AddMenuController extends GetxController {
   }
 
   Future<void> requestGalleryPermission() async {
-    final status = await Permission.photos.request();
+    final status = Platform.isAndroid
+    ? await Permission.storage.request()
+    : await Permission.photos.request();
 
     if (status.isDenied) {
       Get.snackbar('Permission Denied', 'App requires gallery access');
@@ -70,7 +73,9 @@ class AddMenuController extends GetxController {
 
   Future<void> pickImageFromGallery() async {
     try {
-      final status = await Permission.photos.request();
+      final status = Platform.isAndroid
+    ? await Permission.storage.request()
+    : await Permission.photos.request();
 
       if (status.isGranted) {
         final XFile? pickedFile = await imagePicker.pickImage(
@@ -79,8 +84,11 @@ class AddMenuController extends GetxController {
         );
         if (pickedFile != null) {
           selectedImage.value = pickedFile.path;
-          Get.snackbar('Success', 'Image selected',
-              snackPosition: SnackPosition.BOTTOM);
+          Get.snackbar(
+            'Success',
+            'Image selected',
+            snackPosition: SnackPosition.BOTTOM,
+          );
         }
       } else if (status.isDenied) {
         Get.snackbar('Permission Denied', 'App requires gallery access');
@@ -101,9 +109,10 @@ class AddMenuController extends GetxController {
     }
   }
 
-
   Future<void> addMenu() async {
-    if (nameController.text.isEmpty || priceController.text.isEmpty || selectedCategoryId.value == null) {
+    if (nameController.text.isEmpty ||
+        priceController.text.isEmpty ||
+        selectedCategoryId.value == null) {
       Get.snackbar('Error', 'All fields are required');
       return;
     }
@@ -113,42 +122,35 @@ class AddMenuController extends GetxController {
 
       final price = double.tryParse(priceController.text) ?? 0.0;
 
-      // Note: Send null for image since local file paths can't be sent directly to API
-      // Image upload functionality should be implemented separately
-      final newProduct = Product(
-        name: nameController.text,
-        description: null,
-        price: price,
-        stock: 0,
-        image: null,
-        categoryId: selectedCategoryId.value ?? 1,
-      );
+      if (selectedImage.value != null) {
+        // 🔥 pakai upload gambar
+        await apiService.createProductWithImage(
+          nameController.text,
+          price,
+          0,
+          selectedCategoryId.value!,
+          File(selectedImage.value!),
+        );
+      } else {
+        // fallback tanpa gambar
+        final newProduct = Product(
+          name: nameController.text,
+          description: null,
+          price: price,
+          stock: 0,
+          image: null,
+          categoryId: selectedCategoryId.value!,
+        );
 
-      debugPrint('Adding menu item: ${newProduct.name}');
-      await menuController.addMenuItem(newProduct);
-      debugPrint('Menu item added successfully');
+        await menuController.addMenuItem(newProduct);
+      }
 
-      // Clear form
-      nameController.clear();
-      priceController.clear();
-      selectedImage.value = null;
+      await menuController.loadMenuItems();
 
       Get.back();
-      Get.snackbar(
-        'Success',
-        'Menu item added successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFB71C1C),
-        colorText: Colors.white,
-      );
+      Get.snackbar('Success', 'Menu berhasil ditambahkan');
     } catch (e) {
-      debugPrint('Error adding menu: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to add menu: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 5),
-      );
+      Get.snackbar('Error', 'Gagal: $e');
     } finally {
       isLoading.value = false;
     }

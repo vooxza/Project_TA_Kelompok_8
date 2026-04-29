@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:project_ta_kelompok_8/models/category_model.dart' as category_models;
 import 'package:project_ta_kelompok_8/models/product_model.dart';
@@ -216,6 +217,49 @@ class ApiService {
     }
   }
 
+  Future<Product> createProductWithImage(
+  String name,
+  double price,
+  int stock,
+  int categoryId,
+  File imageFile, {
+  String? description,
+}) async {
+  try {
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/products'),
+    );
+
+    request.headers['Accept'] = 'application/json';
+
+    // Fields
+    request.fields['name'] = name;
+    request.fields['price'] = price.toInt().toString();
+    request.fields['stock'] = stock.toString();
+    request.fields['category_id'] = categoryId.toString();
+    if (description != null) {
+      request.fields['description'] = description;
+    }
+
+    // Image
+    request.files.add(
+      await http.MultipartFile.fromPath('image', imageFile.path),
+    );
+
+    var response = await request.send();
+    var res = await http.Response.fromStream(response);
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return Product.fromJson(jsonDecode(res.body));
+    } else {
+      throw Exception('Upload gagal: ${response.statusCode} ${res.body}');
+    }
+  } catch (e) {
+    throw Exception('Error upload: $e');
+  }
+}
+
   Future<Product> updateProduct(
     int id,
     String name,
@@ -239,6 +283,47 @@ class ApiService {
       throw Exception('Failed to update product: $e');
     }
   }
+
+  Future<Product> updateProductWithImage(
+  int id,
+  String name,
+  double price,
+  int stock,
+  int categoryId,
+  File? imageFile,
+) async {
+  try {
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/products/$id'),
+    );
+
+    request.headers['Accept'] = 'application/json';
+
+    request.fields['_method'] = 'PUT';
+    request.fields['name'] = name;
+    request.fields['price'] = price.toInt().toString();
+    request.fields['stock'] = stock.toString();
+    request.fields['category_id'] = categoryId.toString();
+
+    if (imageFile != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath('image', imageFile.path),
+      );
+    }
+
+    var response = await request.send();
+    var res = await http.Response.fromStream(response);
+
+    if (response.statusCode == 200) {
+      return Product.fromJson(jsonDecode(res.body));
+    } else {
+      throw Exception('Update gagal: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Error update: $e');
+  }
+}
 
   Future<void> deleteProduct(int id) async {
     try {

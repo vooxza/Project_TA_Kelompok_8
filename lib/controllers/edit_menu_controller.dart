@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart' hide MenuController;
 import 'package:get/get.dart';
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../controllers/menu_controller.dart';
 import '../widgets/dialog_button.dart';
-import 'package:project_ta_kelompok_8/models/product_model.dart';
+import '../models/category_model.dart';
 
 class EditMenuController extends GetxController {
   late TextEditingController nameController;
@@ -12,6 +13,9 @@ class EditMenuController extends GetxController {
 
   var selectedImage = Rxn<String>();
   final ImagePicker imagePicker = ImagePicker();
+
+  var selectedCategoryId = Rxn<int>();
+  var categories = <Category>[].obs;
 
   final menuController = Get.find<MenuController>();
 
@@ -29,9 +33,11 @@ class EditMenuController extends GetxController {
     if (args != null) {
       menuId = args['id'] as int?;
       nameController.text = args['name'] ?? '';
+      selectedCategoryId.value = args['category_id'];
       priceController.text = args['price']?.toString() ?? '';
       selectedImage.value = args['image'];
     }
+    loadCategories();
   }
 
   @override
@@ -45,9 +51,16 @@ class EditMenuController extends GetxController {
     selectedImage.value = imagePath;
   }
 
+  Future<void> loadCategories() async {
+    final result = await menuController.apiService.getCategories();
+    categories.value = result;
+  }
+
   Future<void> pickImageFromGallery() async {
     try {
-      final status = await Permission.photos.request();
+      final status = Platform.isAndroid
+          ? await Permission.storage.request()
+          : await Permission.photos.request();
 
       if (status.isGranted) {
         final XFile? pickedFile = await imagePicker.pickImage(
@@ -56,8 +69,11 @@ class EditMenuController extends GetxController {
         );
         if (pickedFile != null) {
           selectedImage.value = pickedFile.path;
-          Get.snackbar('Success', 'Image selected',
-              snackPosition: SnackPosition.BOTTOM);
+          Get.snackbar(
+            'Success',
+            'Image selected',
+            snackPosition: SnackPosition.BOTTOM,
+          );
         }
       } else if (status.isDenied) {
         Get.snackbar('Permission Denied', 'Gallery access required');
@@ -78,54 +94,40 @@ class EditMenuController extends GetxController {
     }
   }
 
-  void saveMenu() {
+  void saveMenu() async {
     if (nameController.text.isEmpty || priceController.text.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Name and Price cannot be empty',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFB71C1C),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(12),
-      );
+      Get.snackbar('Error', 'Name and Price cannot be empty');
       return;
     }
 
     final price = double.tryParse(priceController.text) ?? 0.0;
 
-    if (menuId != null) {
-      final updatedProduct = Product(
-        id: menuId,
-        name: nameController.text,
-        description: null,
-        image: selectedImage.value,
-        stock: 0,
-        price: price,
-        categoryId: 1,
-      );
-      menuController.updateMenuItem(updatedProduct);
-    } else {
-      final newProduct = Product(
-        name: nameController.text,
-        description: null,
-        image: selectedImage.value,
-        stock: 0,
-        price: price,
-        categoryId: 1,
-      );
-      menuController.addMenuItem(newProduct);
+    File? imageFile;
+
+    if (selectedImage.value != null &&
+        !selectedImage.value!.startsWith('http')) {
+      imageFile = File(selectedImage.value!);
     }
 
-    Get.snackbar(
-      'Success',
-      'Menu telah disimpan',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFFB71C1C),
-      colorText: Colors.white,
-      margin: const EdgeInsets.all(12),
-    );
+    try {
+      if (menuId != null) {
+        await menuController.apiService.updateProductWithImage(
+          menuId!,
+          nameController.text,
+          price,
+          0,
+          selectedCategoryId.value!,
+          imageFile,
+        );
+      }
 
-    Get.back();
+      await menuController.loadMenuItems();
+
+      Get.back();
+      Get.snackbar('Success', 'Menu berhasil diupdate');
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal update: $e');
+    }
   }
 
   void deleteMenu() {
@@ -133,7 +135,7 @@ class EditMenuController extends GetxController {
 
     Get.dialog(
       CustomDialog(
-        title: "Confirm",
+        title: "Hapus Menu?",
         message: "Anda yakin ingin menghapus menu ini?",
         textCancel: "Batal",
         textConfirm: "Hapus",
