@@ -6,7 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'menu_controller.dart' as menu;
 import 'package:project_ta_kelompok_8/models/product_model.dart';
 import 'package:project_ta_kelompok_8/models/category_model.dart';
-import 'package:project_ta_kelompok_8/services/api_service.dart';
+import 'package:project_ta_kelompok_8/core/services/api_service.dart';
 
 class AddMenuController extends GetxController {
   late TextEditingController nameController;

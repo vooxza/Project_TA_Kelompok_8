@@ -1,15 +1,17 @@
 import 'package:get/get.dart';
-import 'package:project_ta_kelompok_8/pages/homepage.dart';
-import 'package:project_ta_kelompok_8/pages/menu.dart';
-import 'package:project_ta_kelompok_8/pages/edit_menu.dart';
-import 'package:project_ta_kelompok_8/pages/add_menu.dart';
-import 'package:project_ta_kelompok_8/pages/cart.dart';
-import 'package:project_ta_kelompok_8/pages/payment.dart';
-import 'package:project_ta_kelompok_8/pages/profile.dart';
+import 'package:project_ta_kelompok_8/pages/login_page.dart';
+import 'package:project_ta_kelompok_8/pages/home_page.dart';
+import 'package:project_ta_kelompok_8/pages/menu_page.dart';
+import 'package:project_ta_kelompok_8/pages/edit_menu_page.dart';
+import 'package:project_ta_kelompok_8/pages/add_menu_page.dart';
+import 'package:project_ta_kelompok_8/pages/cart_page.dart';
+import 'package:project_ta_kelompok_8/pages/payment_page.dart';
+import 'package:project_ta_kelompok_8/pages/profile_page.dart';
 import 'package:project_ta_kelompok_8/pages/splashscreen.dart';
 import 'package:project_ta_kelompok_8/pages/startingscreen.dart';
-import 'package:project_ta_kelompok_8/routes/routes.dart';
+import 'package:project_ta_kelompok_8/routes/app_routes.dart';
 
+import '../bindings/login_binding.dart';
 import '../bindings/homepage_binding.dart';
 import '../bindings/menu_binding.dart';
 import '../bindings/edit_menu_binding.dart';
@@ -30,6 +32,12 @@ class AppPages {
       name: AppRoutes.start,
       page: () => StartingScreen(),
       binding: StartingScreenBinding(),
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AppRoutes.login,
+      page: () => LoginPage(),
+      binding: LoginBinding(),
       transition: Transition.fadeIn,
     ),
     GetPage(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../theme/colors.dart';
+import '../core/theme/app_colors.dart';
 import '../widgets/custom_input.dart';
 import '../widgets/custom_dropdown.dart';
 import '../widgets/custom_button.dart';

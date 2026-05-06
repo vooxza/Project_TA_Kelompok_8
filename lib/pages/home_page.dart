@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../theme/colors.dart';
+import '../core/theme/app_colors.dart';
 import '../widgets/index.dart';
 import '../controllers/homepage_controller.dart';
 
@@ -9,7 +9,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final HomePageController controller = Get.put(HomePageController());
+    final HomePageController controller = Get.find<HomePageController>();
 
     return Scaffold(
       backgroundColor: AppColors.bgGrey,

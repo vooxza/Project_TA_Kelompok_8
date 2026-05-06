@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart' hide MenuController;
 import 'package:get/get.dart';
-import '../theme/colors.dart';
-import '../routes/routes.dart';
+import '../core/theme/app_colors.dart';
+import '../routes/app_routes.dart';
 import '../controllers/menu_controller.dart';
 import '../controllers/cart_controller.dart';
 import '../widgets/bottom_nav_bar.dart';
-import '../widgets/menu_card.dart';
-import '../widgets/category_chips.dart';
+import '../widgets/menu/menu_card.dart';
+import '../widgets/menu/category_chips.dart';
 
 class MenuPage extends GetView<MenuController> {
   const MenuPage({super.key});

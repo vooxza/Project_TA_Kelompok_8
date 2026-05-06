@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' hide MenuController;
 import 'package:get/get.dart';
-import '../theme/colors.dart';
-import '../controllers/menu_controller.dart';
+import '../../core/theme/app_colors.dart';
+import '../../controllers/menu_controller.dart';
 
 class MenuGrid extends StatelessWidget {
   final int? selectedCategoryId;

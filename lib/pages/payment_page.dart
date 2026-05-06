@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/bottomnav_controller.dart';
 import '../widgets/dialog_button.dart';
-import '../theme/colors.dart';
+import '../core/theme/app_colors.dart';
 
 class PaymentPage extends StatelessWidget {
   const PaymentPage({super.key});
@@ -133,7 +133,12 @@ class PaymentPage extends StatelessWidget {
   /// =========================
   Widget _buildPayButton(CartController cart) {
     return GestureDetector(
-      onTap: () => _showSuccessDialog(cart),
+      onTap: () async {
+        await cart.checkout(1); // userId sementara
+
+        // tampilkan dialog setelah sukses
+        _showSuccessDialog(cart);
+      },
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -173,95 +178,95 @@ class PaymentPage extends StatelessWidget {
   /// =========================
   /// DIALOG SUCCESS (PAKAI CUSTOM DIALOG)
   /// =========================
-void _showSuccessDialog(CartController cart) {
-  final nav = Get.find<BottomNavController>();
+  void _showSuccessDialog(CartController cart) {
+    final nav = Get.find<BottomNavController>();
 
-  Get.dialog(
-    Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
-        decoration: BoxDecoration(
-          color: AppColors.textWhite,
-          borderRadius: BorderRadius.circular(28),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // ICON SUCCESS
-            Container(
-              width: 84,
-              height: 84,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.success,
-              ),
-              child: const Icon(
-                Icons.check,
-                color: AppColors.textWhite,
-                size: 48,
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // TITLE
-            const Text(
-              "PEMBAYARAN BERHASIL",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textBlack,
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            // MESSAGE
-            const Text(
-              "Silahkan ambil nota untuk melihat pesanan.\n"
-              "Jangan lupa cek kembali saat pesanan sampai di meja.",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: AppColors.textBlack,
-                height: 1.5,
-              ),
-            ),
-
-            const SizedBox(height: 26),
-
-            // BUTTON
-            GestureDetector(
-              onTap: () {
-                cart.clearCart();
-                nav.goToForce(0);
-              },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                decoration: BoxDecoration(
-                  color: AppColors.accentRed,
-                  borderRadius: BorderRadius.circular(30),
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+          decoration: BoxDecoration(
+            color: AppColors.textWhite,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ICON SUCCESS
+              Container(
+                width: 84,
+                height: 84,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.success,
                 ),
-                child: const Center(
-                  child: Text(
-                    "LANJUT",
-                    style: TextStyle(
-                      color: AppColors.textWhite,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                child: const Icon(
+                  Icons.check,
+                  color: AppColors.textWhite,
+                  size: 48,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // TITLE
+              const Text(
+                "PEMBAYARAN BERHASIL",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // MESSAGE
+              const Text(
+                "Silahkan ambil nota untuk melihat pesanan.\n"
+                "Jangan lupa cek kembali saat pesanan sampai di meja.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textBlack,
+                  height: 1.5,
+                ),
+              ),
+
+              const SizedBox(height: 26),
+
+              // BUTTON
+              GestureDetector(
+                onTap: () {
+                  cart.clearCart();
+                  nav.goToForce(0);
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentRed,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "LANJUT",
+                      style: TextStyle(
+                        color: AppColors.textWhite,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-    barrierDismissible: false,
-  );
-}
+      barrierDismissible: false,
+    );
+  }
 }

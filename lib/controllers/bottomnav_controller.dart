@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:project_ta_kelompok_8/routes/routes.dart';
+import 'package:project_ta_kelompok_8/routes/app_routes.dart';
 
 class BottomNavController extends GetxController {
   var currentIndex = 0.obs;

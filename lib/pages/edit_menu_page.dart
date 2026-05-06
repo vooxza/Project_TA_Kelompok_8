@@ -5,7 +5,7 @@ import '../widgets/custom_button.dart';
 import '../widgets/custom_dropdown.dart';
 import '../widgets/image_picker_box.dart';
 import '../controllers/edit_menu_controller.dart';
-import '../theme/colors.dart';
+import '../core/theme/app_colors.dart';
 
 class EditMenuPage extends GetView<EditMenuController> {
   const EditMenuPage({super.key});

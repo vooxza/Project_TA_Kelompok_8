@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/bottomnav_controller.dart';
-import '../theme/colors.dart';
+import '../core/theme/app_colors.dart';
 
 class BottomNavBar extends StatelessWidget {
   const BottomNavBar({super.key});

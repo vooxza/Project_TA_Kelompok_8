@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:project_ta_kelompok_8/models/product_model.dart';
 import 'package:project_ta_kelompok_8/models/category_model.dart' as cat;
-import 'package:project_ta_kelompok_8/services/api_service.dart';
+import 'package:project_ta_kelompok_8/core/services/api_service.dart';
 
 class MenuController extends GetxController {
   var menuItems = <Product>[].obs;

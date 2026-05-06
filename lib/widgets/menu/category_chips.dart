@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../theme/colors.dart';
-import '../controllers/menu_controller.dart' as custom;
+import '../../core/theme/app_colors.dart';
+import '../../controllers/menu_controller.dart' as custom;
 
 class CategoryChips extends GetView<custom.MenuController> {
   const CategoryChips({super.key});

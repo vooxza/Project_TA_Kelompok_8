@@ -1,13 +1,13 @@
 import 'package:get/get.dart';
 import 'package:project_ta_kelompok_8/models/product_model.dart';
-import 'package:project_ta_kelompok_8/services/api_service.dart';
+import 'package:project_ta_kelompok_8/core/services/api_service.dart';
 
 class CartItemModel {
   final Product product;
   RxInt quantity;
 
   CartItemModel({required this.product, required int quantity})
-      : quantity = quantity.obs;
+    : quantity = quantity.obs;
 }
 
 class CartController extends GetxController {
@@ -77,31 +77,32 @@ class CartController extends GetxController {
   Future<void> checkout(int userId) async {
     try {
       if (cartItems.isEmpty) {
-        Get.snackbar('Error', 'Cart is empty');
+        Get.snackbar('Error', 'Cart kosong');
+        return;
+      }
+
+      if (selectedTable.value == null) {
+        Get.snackbar('Error', 'Pilih meja dulu');
         return;
       }
 
       isLoading.value = true;
 
-      final items = cartItems
-          .map((item) => {
-                'productId': item.product.id,
-                'quantity': item.quantity.value,
-                'price': item.product.price,
-              })
-          .toList();
+      final items = cartItems.map((item) {
+        return {
+          "product_id": item.product.id,
+          "quantity": item.quantity.value,
+          "price": item.product.price,
+          "subtotal": item.product.price * item.quantity.value,
+        };
+      }).toList();
 
-      final order = await apiService.createOrder(
-        userId,
-        totalPrice,
-        items,
-      );
+      await apiService.createOrder(totalPrice: totalPrice, items: items);
 
       clearCart();
-      Get.snackbar('Success', 'Order created successfully: ${order.orderNumber}');
-      Get.offNamed('/order-confirmation', arguments: order);
+      Get.snackbar('Success', 'Order berhasil dibuat');
     } catch (e) {
-      Get.snackbar('Error', 'Failed to create order: $e');
+      Get.snackbar('Error', 'Gagal checkout: $e');
     } finally {
       isLoading.value = false;
     }

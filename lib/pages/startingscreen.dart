@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../routes/routes.dart';
+import '../routes/app_routes.dart';
 
 class StartingScreen extends StatelessWidget {
   const StartingScreen({super.key});
@@ -89,7 +89,7 @@ class StartingScreen extends StatelessWidget {
                       ),
                       onPressed: () {
                         // MENGGUNAKAN ROUTE NAME DARI APP PAGES
-                        Get.offAllNamed(AppRoutes.homepage);
+                        Get.offAllNamed(AppRoutes.login);
                       },
                       child: const Text(
                         "Pesan Sekarang!",

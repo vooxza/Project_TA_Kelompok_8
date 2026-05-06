@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../theme/colors.dart';
-import '../routes/routes.dart';
-import '../controllers/menu_controller.dart';
-import '../controllers/cart_controller.dart';
-import '../services/api_service.dart';
+import '../../core/theme/app_colors.dart';
+import '../../routes/app_routes.dart';
+import '../../controllers/cart_controller.dart';
+import '../../core/services/api_service.dart';
 
 class MenuCard extends StatelessWidget {
   final dynamic item;

@@ -3,7 +3,7 @@ class Order {
   final String orderNumber;
   final int userId;
   final double totalAmount;
-  final String status; // 'pending', 'completed', 'cancelled'
+  final String status;
   final String? notes;
   final List<OrderItem> items;
   final DateTime? createdAt;
@@ -21,43 +21,42 @@ class Order {
     this.updatedAt,
   });
 
+  // 🔥 helper biar gak error String -> num
+  static double _toDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString()) ?? 0.0;
+  }
+
+  static int _toInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    return int.tryParse(value.toString()) ?? 0;
+  }
+
   factory Order.fromJson(Map<String, dynamic> json) {
     List<OrderItem> items = [];
     if (json['items'] != null) {
       items = (json['items'] as List)
-          .map((item) => OrderItem.fromJson(item as Map<String, dynamic>))
+          .map((item) => OrderItem.fromJson(item))
           .toList();
     }
 
     return Order(
-      id: json['id'] as int?,
-      orderNumber: json['orderNumber'] as String? ?? '',
-      userId: json['userId'] as int? ?? 0,
-      totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
-      status: json['status'] as String? ?? 'pending',
-      notes: json['notes'] as String?,
+      id: json['id'],
+      orderNumber: json['order_number'] ?? '',
+      userId: _toInt(json['user_id']),
+      totalAmount: _toDouble(json['total_price']),
+      status: json['status'] ?? 'pending',
+      notes: json['notes'],
       items: items,
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
           : null,
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
           : null,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'orderNumber': orderNumber,
-      'userId': userId,
-      'totalAmount': totalAmount,
-      'status': status,
-      'notes': notes,
-      'items': items.map((item) => item.toJson()).toList(),
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
-    };
   }
 }
 
@@ -76,23 +75,25 @@ class OrderItem {
     required this.price,
   });
 
-  factory OrderItem.fromJson(Map<String, dynamic> json) {
-    return OrderItem(
-      id: json['id'] as int?,
-      orderId: json['orderId'] as int? ?? 0,
-      productId: json['productId'] as int? ?? 0,
-      quantity: json['quantity'] as int? ?? 0,
-      price: (json['price'] as num?)?.toDouble() ?? 0.0,
-    );
+  static double _toDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString()) ?? 0.0;
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'orderId': orderId,
-      'productId': productId,
-      'quantity': quantity,
-      'price': price,
-    };
+  static int _toInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    return int.tryParse(value.toString()) ?? 0;
+  }
+
+  factory OrderItem.fromJson(Map<String, dynamic> json) {
+    return OrderItem(
+      id: json['id'],
+      orderId: _toInt(json['order_id']),
+      productId: _toInt(json['product_id']),
+      quantity: _toInt(json['quantity']),
+      price: _toDouble(json['price']),
+    );
   }
 }

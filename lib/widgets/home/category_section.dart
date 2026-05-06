@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'category_card.dart';
+import '../category_card.dart';
 
 class CategorySection extends StatelessWidget {
   final String selectedCategory;

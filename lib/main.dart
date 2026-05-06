@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'routes/pages.dart';
-import 'routes/routes.dart';
-import 'theme/app_theme.dart';
+import 'routes/app_pages.dart';
+import 'routes/app_routes.dart';
+import 'core/theme/app_theme.dart';
 import 'controllers/bottomnav_controller.dart';
 import 'controllers/cart_controller.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:get/get.dart';
 import 'package:project_ta_kelompok_8/models/category_model.dart';
-import 'package:project_ta_kelompok_8/services/api_service.dart';
+import 'package:project_ta_kelompok_8/core/services/api_service.dart';
 
 class CategoryController extends GetxController {
   var categories = <Category>[].obs;

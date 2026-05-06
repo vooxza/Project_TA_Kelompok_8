@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../theme/colors.dart';
+import '../core/theme/app_colors.dart';
 
 class ImagePickerBox extends StatelessWidget {
   final String? imagePath;

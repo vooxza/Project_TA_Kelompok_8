@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../theme/colors.dart';
-import '../routes/routes.dart';
+import '../core/theme/app_colors.dart';
+import '../routes/app_routes.dart';
 import '../controllers/profile_controller.dart';
 
 class ProfilePage extends StatelessWidget {

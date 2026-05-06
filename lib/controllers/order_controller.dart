@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:project_ta_kelompok_8/models/order_model.dart';
 import 'package:project_ta_kelompok_8/models/payment_model.dart';
-import 'package:project_ta_kelompok_8/services/api_service.dart';
+import 'package:project_ta_kelompok_8/core/services/api_service.dart';
 
 class OrderController extends GetxController {
   var orders = <Order>[].obs;
