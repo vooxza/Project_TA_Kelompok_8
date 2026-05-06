@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:project_ta_kelompok_8/bindings/profile_binding.dart';
+import 'package:project_ta_kelompok_8/pages/history_page.dart';
 import 'package:project_ta_kelompok_8/pages/login_page.dart';
 import 'package:project_ta_kelompok_8/pages/home_page.dart';
 import 'package:project_ta_kelompok_8/pages/menu_page.dart';
@@ -11,6 +13,7 @@ import 'package:project_ta_kelompok_8/pages/splashscreen.dart';
 import 'package:project_ta_kelompok_8/pages/startingscreen.dart';
 import 'package:project_ta_kelompok_8/routes/app_routes.dart';
 
+import 'package:project_ta_kelompok_8/bindings/history_binding.dart';
 import '../bindings/login_binding.dart';
 import '../bindings/homepage_binding.dart';
 import '../bindings/menu_binding.dart';
@@ -78,7 +81,14 @@ class AppPages {
     GetPage(
       name: AppRoutes.profile,
       page: () => ProfilePage(),
+      binding: ProfileBinding(),
       transition: Transition.rightToLeft,
-    )
+    ),
+    GetPage(
+      name: AppRoutes.history,
+      page: () => HistoryPage(),
+      binding: HistoryBinding(),
+      transition: Transition.rightToLeft,
+    ),
   ];
 }

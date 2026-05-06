@@ -1,9 +1,10 @@
 import 'package:get/get.dart';
-import 'package:project_ta_kelompok_8/controllers/profile_controller.dart';
+import '../controllers/profile_controller.dart';
 
 class ProfileBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<ProfileController>(() => ProfileController());
+    // Menggunakan fenix: true agar controller tidak mati saat navigasi bolak-balik
+    Get.lazyPut<ProfileController>(() => ProfileController(), fenix: true);
   }
 }

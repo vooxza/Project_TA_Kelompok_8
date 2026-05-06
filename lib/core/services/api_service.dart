@@ -30,10 +30,7 @@ class ApiService {
   Future<dynamic> _getRequest(String endpoint) async {
     try {
       final response = await http
-          .get(
-            Uri.parse('$baseUrl$endpoint'),
-            headers: _headers(),
-          )
+          .get(Uri.parse('$baseUrl$endpoint'), headers: _headers())
           .timeout(Duration(seconds: timeout));
 
       if (response.statusCode == 200) {
@@ -67,7 +64,8 @@ class ApiService {
         return jsonDecode(response.body);
       } else {
         throw Exception(
-            'Failed to post data: ${response.statusCode} - ${response.body}');
+          'Failed to post data: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       throw Exception('Error: $e');
@@ -92,7 +90,8 @@ class ApiService {
         return jsonDecode(response.body);
       } else {
         throw Exception(
-            'Failed to update data: ${response.statusCode} - ${response.body}');
+          'Failed to update data: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       throw Exception('Error: $e');
@@ -103,10 +102,7 @@ class ApiService {
   Future<void> _deleteRequest(String endpoint) async {
     try {
       final response = await http
-          .delete(
-            Uri.parse('$baseUrl$endpoint'),
-            headers: _headers(),
-          )
+          .delete(Uri.parse('$baseUrl$endpoint'), headers: _headers())
           .timeout(Duration(seconds: timeout));
 
       if (response.statusCode != 200) {
@@ -118,15 +114,11 @@ class ApiService {
   }
 
   // ================== AUTH ==================
-  Future<Map<String, dynamic>> login(
-      String email, String password) async {
+  Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final response = await _postRequest(
         '/login',
-        {
-          'email': email,
-          'password': password,
-        },
+        {'email': email, 'password': password},
         useAuth: false, // 🔥 penting
       );
 
@@ -140,15 +132,14 @@ class ApiService {
   Future<List<category_models.Category>> getCategories() async {
     final response = await _getRequest('/categories');
     List<dynamic> data = response is List ? response : response['data'] ?? [];
-    return data
-        .map((item) => category_models.Category.fromJson(item))
-        .toList();
+    return data.map((item) => category_models.Category.fromJson(item)).toList();
   }
 
   Future<category_models.Category> getCategoryById(int id) async {
     final response = await _getRequest('/categories/$id');
     return category_models.Category.fromJson(
-        response is Map ? response : response['data']);
+      response is Map ? response : response['data'],
+    );
   }
 
   Future<category_models.Category> createCategory(
@@ -161,7 +152,8 @@ class ApiService {
     });
 
     return category_models.Category.fromJson(
-        response is Map ? response : response['data']);
+      response is Map ? response : response['data'],
+    );
   }
 
   Future<category_models.Category> updateCategory(
@@ -175,7 +167,8 @@ class ApiService {
     });
 
     return category_models.Category.fromJson(
-        response is Map ? response : response['data']);
+      response is Map ? response : response['data'],
+    );
   }
 
   Future<void> deleteCategory(int id) async {
@@ -223,8 +216,10 @@ class ApiService {
     String? description,
   }) async {
     try {
-      var request =
-          http.MultipartRequest('POST', Uri.parse('$baseUrl/products'));
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/products'),
+      );
 
       final token = box.read('token');
 
@@ -242,8 +237,9 @@ class ApiService {
         request.fields['description'] = description;
       }
 
-      request.files
-          .add(await http.MultipartFile.fromPath('image', imageFile.path));
+      request.files.add(
+        await http.MultipartFile.fromPath('image', imageFile.path),
+      );
 
       var response = await request.send();
       var res = await http.Response.fromStream(response);
@@ -288,8 +284,10 @@ class ApiService {
     File? imageFile,
   ) async {
     try {
-      var request =
-          http.MultipartRequest('POST', Uri.parse('$baseUrl/products/$id'));
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/products/$id'),
+      );
 
       final token = box.read('token');
 
@@ -305,8 +303,9 @@ class ApiService {
       request.fields['category_id'] = categoryId.toString();
 
       if (imageFile != null) {
-        request.files
-            .add(await http.MultipartFile.fromPath('image', imageFile.path));
+        request.files.add(
+          await http.MultipartFile.fromPath('image', imageFile.path),
+        );
       }
 
       var response = await request.send();
@@ -328,26 +327,47 @@ class ApiService {
 
   // ================== ORDERS ==================
   Future<List<Order>> getOrders() async {
+    // _getRequest secara otomatis mengirimkan token dari user yang login
+    // Laravel akan memfilter datanya berdasarkan role (Admin: semua, Kasir: hari ini)
     final response = await _getRequest('/order');
-    List<dynamic> data = response is List ? response : response['data'] ?? [];
+
+    // Pastikan mengambil data dari key 'data' sesuai response JSON Laravel kamu
+    List<dynamic> data = response['data'] ?? [];
     return data.map((item) => Order.fromJson(item)).toList();
   }
 
   Future<Order> getOrderById(int id) async {
     final response = await _getRequest('/order/$id');
-    return Order.fromJson(response is Map ? response : response['data']);
+    return Order.fromJson(response['data'] ?? response);
   }
 
-  Future<Order> createOrder({
+  Future<void> createOrder({
     required double totalPrice,
     required List<Map<String, dynamic>> items,
+    required String tableNumber,
   }) async {
-    final response = await _postRequest('/order', {
-      'total_price': totalPrice,
-      'items': items,
-    });
+    // AMBIL TOKEN DARI STORAGE
+    String? token = box.read('token');
 
-    return Order.fromJson(response['data']);
+    final response = await http.post(
+      Uri.parse('$baseUrl/order'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token', // Sekarang $token sudah ada isinya
+      },
+      body: jsonEncode({
+        'total_price': totalPrice,
+        'items': items,
+        'table_number': tableNumber,
+      }),
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception(
+        'Failed to post data: ${response.statusCode} - ${response.body}',
+      );
+    }
   }
 
   // ================== PAYMENTS ==================
@@ -368,6 +388,7 @@ class ApiService {
   Future<PaymentStatus> getPaymentStatus(int orderId) async {
     final response = await _getRequest('/payment/status/$orderId');
     return PaymentStatus.fromJson(
-        response is Map ? response : response['data']);
+      response is Map ? response : response['data'],
+    );
   }
 }

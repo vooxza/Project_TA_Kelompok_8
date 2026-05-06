@@ -81,6 +81,7 @@ class CartController extends GetxController {
         return;
       }
 
+      // Validasi meja sudah ada, tapi data ini harus dikirim ke API
       if (selectedTable.value == null) {
         Get.snackbar('Error', 'Pilih meja dulu');
         return;
@@ -97,7 +98,12 @@ class CartController extends GetxController {
         };
       }).toList();
 
-      await apiService.createOrder(totalPrice: totalPrice, items: items);
+      // PERBAIKAN: Tambahkan parameter table_number di sini
+      await apiService.createOrder(
+        totalPrice: totalPrice,
+        items: items,
+        tableNumber: selectedTable.value!, // Kirim nomor meja yang dipilih
+      );
 
       clearCart();
       Get.snackbar('Success', 'Order berhasil dibuat');

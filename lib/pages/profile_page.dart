@@ -4,195 +4,164 @@ import '../core/theme/app_colors.dart';
 import '../routes/app_routes.dart';
 import '../controllers/profile_controller.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends GetView<ProfileController> {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final ProfileController controller = Get.put(ProfileController());
-
     return Scaffold(
       backgroundColor: AppColors.bgGrey,
-      appBar: AppBar(
-        backgroundColor: AppColors.primaryRed,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textWhite),
-          onPressed: () {
-            Get.offNamed(AppRoutes.homepage);
-          },
-        ),
-        title: const Text(
-          "Profile",
-          style: TextStyle(
-            color: AppColors.textWhite,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: Column(
-              children: [
-                const SizedBox(height: 40),
-
-                /// FOTO / ICON USER
-                Center(
-                  child: Container(
-                    width: 180,
-                    height: 180,
-                    decoration: BoxDecoration(
-                      color: AppColors.textWhite,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.grey.shade500,
-                        width: 4,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+        child: Column(
+          children: [
+            /// HEADER CUSTOM (Back Button & Title)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new,
+                      color: Colors.black,
+                      size: 20,
                     ),
-                    child: Icon(
-                      Icons.account_circle_outlined,
-                      size: 150,
-                      color: Colors.grey[700],
-                    ),
+                    onPressed: () => Get.back(), // Navigasi balik ke Homepage
                   ),
-                ),
-
-                const SizedBox(height: 25),
-
-                /// NAMA USER
-                Obx(
-                  () => Text(
-                    controller.userName.value,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-
-                /// PROFILE CARDS
-                Obx(
-                  () => profileCard(
-                    icon: Icons.person,
-                    title: "Nama",
-                    value: controller.userName.value,
-                  ),
-                ),
-                const SizedBox(height: 15),
-
-                Obx(
-                  () => profileCard(
-                    icon: Icons.email,
-                    title: "Email",
-                    value: controller.userEmail.value,
-                  ),
-                ),
-                const SizedBox(height: 15),
-
-                Obx(
-                  () => profileCard(
-                    icon: Icons.phone,
-                    title: "No. HP",
-                    value: controller.userPhone.value,
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryRed,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    onPressed: () {
-                      controller.logout();
-                    },
-                    child: const Text(
-                      "LOGOUT",
+                  const Expanded(
+                    child: Text(
+                      "PROFILE",
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: AppColors.textWhite,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.2,
                       ),
                     ),
                   ),
-                ),
-
-                const SizedBox(height: 30),
-              ],
+                  const SizedBox(
+                    width: 48,
+                  ), // Penyeimbang agar title tetap di tengah
+                ],
+              ),
             ),
-          ),
+
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 30),
+
+                      /// FOTO PROFIL (Lingkaran Abu-abu)
+                      Center(
+                        child: Container(
+                          width: 150,
+                          height: 150,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            border: Border.all(
+                              color: Colors.grey.shade300,
+                              width: 6,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.person_outline,
+                            size: 90,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      /// NAMA USER (DINAMIS)
+                      Obx(
+                        () => Text(
+                          controller.userName.value.toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 5),
+
+                      /// EMAIL (Optional tambahan agar profil tidak terlalu sepi)
+                      Obx(
+                        () => Text(
+                          controller.userEmail.value,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 40),
+
+                      /// BUTTON RIWAYAT PESANAN
+                      SizedBox(
+                        width: double.infinity,
+                        height: 55,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryRed,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            elevation: 0,
+                          ),
+                          onPressed: () => Get.toNamed(AppRoutes.history),
+                          child: const Text(
+                            "Riwayat Pesanan",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            /// BUTTON KELUAR (Tetap di posisi bawah)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 40),
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primaryRed,
+                    side: const BorderSide(
+                      color: AppColors.primaryRed,
+                      width: 2,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: () => controller.logout(),
+                  child: const Text(
+                    "Keluar",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-      ),
-    );
-  }
-
-  Widget profileCard({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      decoration: BoxDecoration(
-        color: AppColors.textWhite,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          )
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.primaryRed, size: 28),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
