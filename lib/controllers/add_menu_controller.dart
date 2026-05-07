@@ -87,7 +87,7 @@ class AddMenuController extends GetxController {
           Get.snackbar(
             'Success',
             'Image selected',
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.TOP,
           );
         }
       } else if (status.isDenied) {
@@ -103,7 +103,7 @@ class AddMenuController extends GetxController {
       Get.snackbar(
         'Error',
         'Failed to select image: $e',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         duration: const Duration(seconds: 3),
       );
     }

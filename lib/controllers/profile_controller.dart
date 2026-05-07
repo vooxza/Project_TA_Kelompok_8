@@ -30,7 +30,7 @@ class ProfileController extends GetxController {
     Get.snackbar(
       'Logout',
       'Berhasil keluar dari akun',
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       duration: const Duration(seconds: 2),
     );
 

@@ -37,7 +37,7 @@ class CategoryController extends GetxController {
       Get.snackbar(
         'Error',
         'Failed to load categories from server',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         duration: const Duration(seconds: 3),
       );
     } finally {

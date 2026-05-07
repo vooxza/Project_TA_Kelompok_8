@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Tambahkan ini untuk mengatur warna icon status bar
 import 'package:get/get.dart';
 import '../core/theme/app_colors.dart';
 import '../widgets/index.dart';
@@ -11,39 +12,41 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final HomePageController controller = Get.find<HomePageController>();
 
-    return Scaffold(
-      backgroundColor: AppColors.bgGrey,
-      body: Column(
-        children: [
-          // Header Component
-          const HomeHeader(),
+   
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: AppColors.bgGrey,
+        body: Column(
+          children: [
+            // Header tetap di atas
+            const HomeHeader(),
+            const PaketCarousel(),
 
-          // Main Content
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Category Section Component
-                  Obx(
-                    () => CategorySection(
-                      selectedCategory: controller.selectedCategory.value,
-                      onCategorySelected: (category) {
-                        controller.selectCategory(category);
-                      },
+                    // Category Section
+                    Obx(
+                      () => CategorySection(
+                        selectedCategory: controller.selectedCategory.value,
+                        onCategorySelected: controller.selectCategory,
+                      ),
                     ),
-                  ),
 
-                  // Menu Grid Component - already has Obx internally
-                  const MenuGrid(),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const MenuGrid(),
 
-                  const SizedBox(height: 30),
-                ],  
+                    const SizedBox(height: 30),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-      bottomNavigationBar: const BottomNavBar(),
     );
   }
 }

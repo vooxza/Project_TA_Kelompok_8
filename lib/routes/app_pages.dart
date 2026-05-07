@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:project_ta_kelompok_8/bindings/profile_binding.dart';
 import 'package:project_ta_kelompok_8/pages/history_page.dart';
 import 'package:project_ta_kelompok_8/pages/login_page.dart';
+import 'package:project_ta_kelompok_8/pages/main_page.dart'; // ← tambah
 import 'package:project_ta_kelompok_8/pages/home_page.dart';
 import 'package:project_ta_kelompok_8/pages/menu_page.dart';
 import 'package:project_ta_kelompok_8/pages/edit_menu_page.dart';
@@ -12,9 +13,9 @@ import 'package:project_ta_kelompok_8/pages/profile_page.dart';
 import 'package:project_ta_kelompok_8/pages/splashscreen.dart';
 import 'package:project_ta_kelompok_8/pages/startingscreen.dart';
 import 'package:project_ta_kelompok_8/routes/app_routes.dart';
-
 import 'package:project_ta_kelompok_8/bindings/history_binding.dart';
 import '../bindings/login_binding.dart';
+import '../bindings/main_binding.dart'; // ← tambah
 import '../bindings/homepage_binding.dart';
 import '../bindings/menu_binding.dart';
 import '../bindings/edit_menu_binding.dart';
@@ -41,6 +42,13 @@ class AppPages {
       name: AppRoutes.login,
       page: () => LoginPage(),
       binding: LoginBinding(),
+      transition: Transition.fadeIn,
+    ),
+    // ← tambah MainPage
+    GetPage(
+      name: AppRoutes.main,
+      page: () => const MainPage(),
+      binding: MainBinding(),
       transition: Transition.fadeIn,
     ),
     GetPage(

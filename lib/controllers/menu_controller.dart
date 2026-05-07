@@ -13,27 +13,31 @@ class MenuController extends GetxController {
 
   var errorMessage = ''.obs;
   final apiService = ApiService();
-  var _isInitialized = false;
 
   @override
   void onInit() {
     super.onInit();
-    ensureLoaded();
-    loadCategories();
+    _initData();
   }
 
-  Future<void> ensureLoaded() async {
-    if (_isInitialized) return;
-    _isInitialized = true;
+  Future<void> _initData() async {
     await loadMenuItems();
+    await loadCategories();
   }
 
   List<Product> get filteredMenu {
+    debugPrint('=== filteredMenu called ===');
+    debugPrint('selectedCategoryId: ${selectedCategoryId.value}');
+    debugPrint('menuItems count: ${menuItems.length}');
+
     if (selectedCategoryId.value == null) return menuItems;
 
-    return menuItems
+    final filtered = menuItems
         .where((item) => item.categoryId == selectedCategoryId.value)
         .toList();
+
+    debugPrint('filtered count: ${filtered.length}');
+    return filtered;
   }
 
   Future<void> loadCategories() async {

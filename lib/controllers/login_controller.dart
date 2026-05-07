@@ -30,14 +30,17 @@ class LoginController extends GetxController {
       );
 
       final token = response['access_token'];
+      final user = response['user'];
+
+      // Simpan semua data session
       box.write('token', token);
-      box.write('user', response['user']);
+      box.write('user', user);
+      box.write('name', user['name']);   // ✅ untuk ProfileController
+      box.write('email', user['email']); // ✅ untuk ProfileController
+      box.write('role', user['role']);   // ✅ simpan role juga kalau ada
 
       print('TOKEN TERSIMPAN: $token');
       print('LOGIN RESPONSE: $response');
-
-      // TODO: ambil token kalau ada
-      // final token = response['token'];
 
       Get.snackbar(
         'Sukses',
@@ -45,8 +48,7 @@ class LoginController extends GetxController {
         snackPosition: SnackPosition.TOP,
       );
 
-      // TODO: redirect halaman
-      Get.offAllNamed(AppRoutes.homepage);
+      Get.offAllNamed(AppRoutes.main);
 
     } catch (e) {
       errorMessage.value = e.toString();

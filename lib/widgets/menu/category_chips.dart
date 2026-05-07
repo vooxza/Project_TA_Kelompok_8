@@ -9,17 +9,18 @@ class CategoryChips extends GetView<custom.MenuController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      final selectedId = controller.selectedCategoryId.value; 
+      final categories = controller.categories;               
+
       return SizedBox(
         height: 40,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 15),
-          itemCount: controller.categories.length,
+          itemCount: categories.length,
           itemBuilder: (context, index) {
-            final category = controller.categories[index];
-
-            final isSelected =
-                controller.selectedCategoryId.value == category.id;
+            final category = categories[index];
+            final isSelected = selectedId == category.id; 
 
             return GestureDetector(
               behavior: HitTestBehavior.opaque,

@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart' hide MenuController;
 import 'package:get/get.dart';
-import '../core/theme/app_colors.dart';
 import '../routes/app_routes.dart';
 import '../controllers/menu_controller.dart';
 import '../controllers/cart_controller.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/menu/menu_card.dart';
 import '../widgets/menu/category_chips.dart';
+import '../core/theme/app_colors.dart';
 
-class MenuPage extends StatelessWidget {
+class MenuPage extends GetView<MenuController> {
   const MenuPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final menuController = Get.find<MenuController>();
     final cartController = Get.find<CartController>();
 
     return Scaffold(
@@ -27,53 +26,45 @@ class MenuPage extends StatelessWidget {
         ],
       ),
 
-      body: Column(
-        children: [
-          const SizedBox(height: 10),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          const CategoryChips(),
+        return Column(
+          children: [
+            const SizedBox(height: 10),
 
-          const SizedBox(height: 10),
+            /// CATEGORY
+            CategoryChips(),
 
-          Expanded(
-            child: Obx(() {
-              final selectedId = menuController.selectedCategoryId.value; // ← track
-              final filteredMenu = menuController.filteredMenu;           // ← track
+            const SizedBox(height: 10),
 
-              if (menuController.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (filteredMenu.isEmpty) {
-                return const Center(
-                  child: Text(
-                    'Tidak ada menu tersedia',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                );
-              }
-
-              return GridView.builder(
+            /// GRID MENU
+            Expanded(
+              child: GridView.builder(
                 padding: const EdgeInsets.all(15),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   childAspectRatio: 0.75,
                   crossAxisSpacing: 15,
                   mainAxisSpacing: 15,
                 ),
-                itemCount: filteredMenu.length,
+                itemCount: controller.filteredMenu.length,
                 itemBuilder: (context, index) {
-                  final item = filteredMenu[index];
+                  final item = controller.filteredMenu[index];
                   return MenuCard(
                     item: item,
                     cartController: cartController,
                   );
                 },
-              );
-            }),
-          ),
-        ],
-      ),
+              ),
+            ),
+          ],
+        );
+      }),
+
 
     );
   }

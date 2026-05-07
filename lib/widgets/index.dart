@@ -5,3 +5,4 @@ export 'starting_screen.dart';
 export 'home/home_header.dart';
 export 'home/category_section.dart';
 export 'home/menu_grid.dart';
+export 'home/paket_carousel.dart'; 
