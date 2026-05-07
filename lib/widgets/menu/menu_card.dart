@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../routes/app_routes.dart';
 import '../../controllers/cart_controller.dart';
 import '../../core/services/api_service.dart';
+import '../../widgets/cart/cart_badge_button.dart';
 
 class MenuCard extends StatelessWidget {
   final dynamic item;
@@ -112,21 +113,9 @@ class MenuCard extends StatelessWidget {
                         ),
                       ),
 
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        color: AppColors.textWhite,
-                        style: IconButton.styleFrom(
-                          backgroundColor: AppColors.primaryRed,
-                        ),
-                        onPressed: () {
-                          cartController.addToCart(item);
-                          Get.snackbar(
-                            "Berhasil",
-                            "${item.name} ditambahkan",
-                            backgroundColor: AppColors.primaryRed,
-                            colorText: AppColors.textWhite,
-                          );
-                        },
+                      CartBadgeButton(
+                        item: item,
+                        cartController: cartController,
                       ),
                     ],
                   ),

@@ -89,7 +89,7 @@ class StartingScreen extends StatelessWidget {
                       ),
                       onPressed: () {
                         // MENGGUNAKAN ROUTE NAME DARI APP PAGES
-                        Get.offAllNamed(AppRoutes.login);
+                        Get.toNamed(AppRoutes.login);
                       },
                       child: const Text(
                         "Pesan Sekarang!",

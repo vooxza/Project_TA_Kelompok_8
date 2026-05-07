@@ -343,8 +343,8 @@ class ApiService {
 
   Future<void> createOrder({
     required double totalPrice,
-    required List<Map<String, dynamic>> items,
     required String tableNumber,
+    required List<Map<String, dynamic>> items,
   }) async {
     // AMBIL TOKEN DARI STORAGE
     String? token = box.read('token');

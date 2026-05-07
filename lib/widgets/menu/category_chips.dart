@@ -8,22 +8,24 @@ class CategoryChips extends GetView<custom.MenuController> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 40,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        itemCount: controller.categories.length,
-        itemBuilder: (context, index) {
-          final category = controller.categories[index];
+    return Obx(() {
+      return SizedBox(
+        height: 40,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          itemCount: controller.categories.length,
+          itemBuilder: (context, index) {
+            final category = controller.categories[index];
 
-          return Obx(() {
             final isSelected =
                 controller.selectedCategoryId.value == category.id;
 
             return GestureDetector(
-              onTap: () =>
-                  controller.selectedCategoryId.value = category.id,
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                controller.selectedCategoryId.value = category.id;
+              },
               child: Container(
                 margin: const EdgeInsets.only(right: 10),
                 padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -47,9 +49,9 @@ class CategoryChips extends GetView<custom.MenuController> {
                 ),
               ),
             );
-          });
-        },
-      ),
-    );
+          },
+        ),
+      );
+    });
   }
 }

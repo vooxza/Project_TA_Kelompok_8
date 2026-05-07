@@ -8,11 +8,12 @@ import '../widgets/bottom_nav_bar.dart';
 import '../widgets/menu/menu_card.dart';
 import '../widgets/menu/category_chips.dart';
 
-class MenuPage extends GetView<MenuController> {
+class MenuPage extends StatelessWidget {
   const MenuPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final menuController = Get.find<MenuController>();
     final cartController = Get.find<CartController>();
 
     return Scaffold(
@@ -27,7 +28,8 @@ class MenuPage extends GetView<MenuController> {
       ),
 
       body: Obx(() {
-        if (controller.isLoading.value) {
+        menuController.selectedCategoryId.value;
+        if (menuController.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -51,9 +53,9 @@ class MenuPage extends GetView<MenuController> {
                   crossAxisSpacing: 15,
                   mainAxisSpacing: 15,
                 ),
-                itemCount: controller.filteredMenu.length,
+                itemCount: menuController.filteredMenu.length,
                 itemBuilder: (context, index) {
-                  final item = controller.filteredMenu[index];
+                  final item = menuController.filteredMenu[index];
                   return MenuCard(
                     item: item,
                     cartController: cartController,

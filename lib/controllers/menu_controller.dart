@@ -28,7 +28,6 @@ class MenuController extends GetxController {
     await loadMenuItems();
   }
 
-  // 🔥 FILTER
   List<Product> get filteredMenu {
     if (selectedCategoryId.value == null) return menuItems;
 

@@ -16,7 +16,14 @@ class CartController extends GetxController {
   var isLoading = false.obs;
   final apiService = ApiService();
 
-  /// Add to cart
+  int getItemQuantity(int productId) {
+    final cartItem = cartItems.firstWhereOrNull(
+      (item) => item.product.id == productId,
+    );
+
+    return cartItem?.quantity.value ?? 0;
+  }
+
   void addToCart(Product item) {
     final index = cartItems.indexWhere((cart) => cart.product.id == item.id);
 
@@ -29,7 +36,6 @@ class CartController extends GetxController {
     cartItems.refresh();
   }
 
-  /// Increase quantity
   void incrementQuantity(int productId) {
     final index = cartItems.indexWhere((cart) => cart.product.id == productId);
     if (index != -1) {
@@ -38,7 +44,6 @@ class CartController extends GetxController {
     }
   }
 
-  /// Decrease quantity
   void decrementQuantity(int productId) {
     final index = cartItems.indexWhere((cart) => cart.product.id == productId);
 
@@ -52,19 +57,16 @@ class CartController extends GetxController {
     }
   }
 
-  /// Remove item directly
   void removeFromCart(int productId) {
     cartItems.removeWhere((cart) => cart.product.id == productId);
   }
 
-  /// Total price
   double get totalPrice {
     return cartItems.fold(0.0, (sum, item) {
       return sum + (item.product.price * item.quantity.value);
     });
   }
 
-  /// Format rupiah
   String formatRupiah(double amount) {
     final amountInt = amount.toInt();
     String result = amountInt.toString();
@@ -73,7 +75,6 @@ class CartController extends GetxController {
     return 'Rp $result';
   }
 
-  /// Create order from cart
   Future<void> checkout(int userId) async {
     try {
       if (cartItems.isEmpty) {
@@ -98,11 +99,10 @@ class CartController extends GetxController {
         };
       }).toList();
 
-      // PERBAIKAN: Tambahkan parameter table_number di sini
       await apiService.createOrder(
         totalPrice: totalPrice,
         items: items,
-        tableNumber: selectedTable.value!, // Kirim nomor meja yang dipilih
+        tableNumber: selectedTable.value!,
       );
 
       clearCart();
