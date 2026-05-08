@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart' hide MenuController;
 import 'package:get/get.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/services/role_service.dart';
 import '../../controllers/menu_controller.dart';
+import '../../routes/app_routes.dart';
 
 class MenuGrid extends StatelessWidget {
   final int? selectedCategoryId;
@@ -37,21 +39,54 @@ class MenuGrid extends StatelessWidget {
         );
       }
 
-      return GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.8,
-          crossAxisSpacing: 15,
-          mainAxisSpacing: 15,
-        ),
-        itemCount: filteredItems.length,
-        itemBuilder: (context, index) {
-          final item = filteredItems[index];
-          return _buildMenuCard(context, item);
-        },
+      return Column(
+        children: [
+          // ✅ Tombol Tambah Menu — hanya muncul untuk admin
+          if (RoleService.isAdmin)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryRed,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: () => Get.toNamed(AppRoutes.addMenu),
+                  icon: const Icon(Icons.add),
+                  label: const Text(
+                    'Tambah Menu',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.8,
+              crossAxisSpacing: 15,
+              mainAxisSpacing: 15,
+            ),
+            itemCount: filteredItems.length,
+            itemBuilder: (context, index) {
+              final item = filteredItems[index];
+              return _buildMenuCard(context, item);
+            },
+          ),
+        ],
       );
     });
   }
@@ -98,6 +133,7 @@ class MenuGrid extends StatelessWidget {
                     ),
             ),
           ),
+
           // Info Section
           Expanded(
             child: Padding(
@@ -137,23 +173,45 @@ class MenuGrid extends StatelessWidget {
                           color: AppColors.primaryRed,
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          // Add to cart logic here
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryRed,
-                            borderRadius: BorderRadius.circular(8),
+
+                      // ✅ Admin: tombol edit | User: tombol add to cart
+                      if (RoleService.isAdmin)
+                        GestureDetector(
+                          onTap: () => Get.toNamed(
+                            AppRoutes.editMenu,
+                            arguments: item,
                           ),
-                          child: const Icon(
-                            Icons.add,
-                            color: AppColors.textWhite,
-                            size: 18,
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryRed,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.edit,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        )
+                      else
+                        GestureDetector(
+                          onTap: () {
+                            // Add to cart logic here
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryRed,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              color: Colors.white,
+                              size: 18,
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ],

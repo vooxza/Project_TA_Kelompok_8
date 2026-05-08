@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:project_ta_kelompok_8/routes/app_routes.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/bottomnav_controller.dart';
 import '../widgets/dialog_button.dart';
@@ -242,6 +243,7 @@ class PaymentPage extends StatelessWidget {
                 onTap: () {
                   cart.clearCart();
                   nav.goToForce(0);
+                  Get.offNamed(AppRoutes.main);
                 },
                 child: Container(
                   width: double.infinity,

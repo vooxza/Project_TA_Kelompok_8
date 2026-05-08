@@ -102,7 +102,6 @@ class HistoryPage extends GetView<HistoryController> {
   Widget _buildTableSelection() {
     // OPSI A: Sesuaikan list di bawah ini agar persis dengan data di database (HeidiSQL)
     final List<String> tables = [
-      "Meja Umum",
       "Meja 1",
       "Meja 2",
       "Meja 3",

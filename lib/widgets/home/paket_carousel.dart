@@ -9,8 +9,7 @@ class PaketCarousel extends GetView<HomePageController> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // Mengubah background menjadi bgGrey
-      color: AppColors.bgGrey, 
+      color: AppColors.bgGrey,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -26,7 +25,6 @@ class PaketCarousel extends GetView<HomePageController> {
               ),
             ),
           ),
-
           Obx(() {
             final current = controller.currentPaketIndex.value;
             final total = controller.paketList.length;
@@ -92,7 +90,7 @@ class _PaketCard extends StatelessWidget {
           key: ValueKey(current),
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.white, // Card tetap putih agar kontras dengan bgGrey
+            color: Colors.white,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(

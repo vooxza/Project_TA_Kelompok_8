@@ -10,7 +10,6 @@ class LoginController extends GetxController {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  // State
   var isLoading = false.obs;
   var errorMessage = ''.obs;
 
@@ -32,15 +31,11 @@ class LoginController extends GetxController {
       final token = response['access_token'];
       final user = response['user'];
 
-      // Simpan semua data session
       box.write('token', token);
       box.write('user', user);
-      box.write('name', user['name']);   // ✅ untuk ProfileController
-      box.write('email', user['email']); // ✅ untuk ProfileController
-      box.write('role', user['role']);   // ✅ simpan role juga kalau ada
-
-      print('TOKEN TERSIMPAN: $token');
-      print('LOGIN RESPONSE: $response');
+      box.write('name', user['name']);
+      box.write('email', user['email']);
+      box.write('role', user['role']);
 
       Get.snackbar(
         'Sukses',
@@ -48,7 +43,13 @@ class LoginController extends GetxController {
         snackPosition: SnackPosition.TOP,
       );
 
-      Get.offAllNamed(AppRoutes.main);
+      // ✅ Redirect berdasarkan role
+      final role = user['role'] as String;
+      if (role == 'admin') {
+        Get.offAllNamed(AppRoutes.main);
+      } else {
+        Get.offAllNamed(AppRoutes.main);
+      }
 
     } catch (e) {
       errorMessage.value = e.toString();

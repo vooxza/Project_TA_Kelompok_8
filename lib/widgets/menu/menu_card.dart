@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../routes/app_routes.dart';
 import '../../controllers/cart_controller.dart';
 import '../../core/services/api_service.dart';
+import '../../core/services/role_service.dart';
 import '../../widgets/cart/cart_badge_button.dart';
 
 class MenuCard extends StatelessWidget {
@@ -51,27 +52,28 @@ class MenuCard extends StatelessWidget {
                       : const Icon(Icons.fastfood, size: 40),
                 ),
 
-                /// EDIT BUTTON
-                Positioned(
-                  top: 6,
-                  right: 6,
-                  child: IconButton(
-                    icon: const Icon(Icons.edit, size: 16),
-                    color: AppColors.textWhite,
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppColors.primaryRed,
-                    ),
-                    onPressed: () => Get.toNamed(
-                      AppRoutes.editMenu,
-                      arguments: {
-                        'id': item.id,
-                        'name': item.name,
-                        'price': item.price,
-                        'image': item.image,
-                      },
+                // ✅ Tombol edit hanya untuk admin
+                if (RoleService.isAdmin)
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: IconButton(
+                      icon: const Icon(Icons.edit, size: 16),
+                      color: AppColors.textWhite,
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppColors.primaryRed,
+                      ),
+                      onPressed: () => Get.toNamed(
+                        AppRoutes.editMenu,
+                        arguments: {
+                          'id': item.id,
+                          'name': item.name,
+                          'price': item.price,
+                          'image': item.image,
+                        },
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),

@@ -4,9 +4,9 @@ import '../core/theme/app_colors.dart';
 import '../routes/app_routes.dart';
 import '../controllers/menu_controller.dart';
 import '../controllers/cart_controller.dart';
-import '../widgets/bottom_nav_bar.dart';
 import '../widgets/menu/menu_card.dart';
 import '../widgets/menu/category_chips.dart';
+import '../core/services/role_service.dart';
 
 class MenuPage extends StatelessWidget {
   const MenuPage({super.key});
@@ -20,10 +20,12 @@ class MenuPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Menu"),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add, color: AppColors.textWhite),
-            onPressed: () => Get.toNamed(AppRoutes.addMenu),
-          ),
+          // ✅ Hanya admin yang bisa lihat tombol tambah
+          if (RoleService.isAdmin)
+            IconButton(
+              icon: const Icon(Icons.add, color: AppColors.textWhite),
+              onPressed: () => Get.toNamed(AppRoutes.addMenu),
+            ),
         ],
       ),
 
@@ -37,8 +39,8 @@ class MenuPage extends StatelessWidget {
 
           Expanded(
             child: Obx(() {
-              final selectedId = menuController.selectedCategoryId.value; // ← track
-              final filteredMenu = menuController.filteredMenu;           // ← track
+              final selectedId = menuController.selectedCategoryId.value;
+              final filteredMenu = menuController.filteredMenu;
 
               if (menuController.isLoading.value) {
                 return const Center(child: CircularProgressIndicator());
@@ -74,7 +76,6 @@ class MenuPage extends StatelessWidget {
           ),
         ],
       ),
-
     );
   }
 }

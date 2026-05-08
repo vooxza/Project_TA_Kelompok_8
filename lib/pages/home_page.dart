@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Tambahkan ini untuk mengatur warna icon status bar
+import 'package:flutter/services.dart'; 
 import 'package:get/get.dart';
 import '../core/theme/app_colors.dart';
 import '../widgets/index.dart';
