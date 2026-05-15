@@ -10,7 +10,7 @@ import 'package:project_ta_kelompok_8/models/payment_model.dart';
 
 class ApiService {
   static const String baseUrl =
-      'https://nanometer-campfire-sediment.ngrok-free.dev/api';
+      'http://103.247.8.11/api';
   static const int timeout = 15;
 
   final box = GetStorage();

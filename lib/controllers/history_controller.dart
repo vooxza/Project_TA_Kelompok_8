@@ -1,13 +1,14 @@
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:get_storage/get_storage.dart';
+import 'package:project_ta_kelompok_8/core/services/api_service.dart';
 import 'dart:convert';
 
 class HistoryController extends GetxController {
   var isLoading = true.obs;
   var orderList = [].obs;
   var selectedTable = RxnString();
-  var totalRevenue = 0.0.obs; // Variabel Pendapatan
+  var totalRevenue = 0.0.obs;
   final box = GetStorage();
 
   @override
@@ -16,7 +17,6 @@ class HistoryController extends GetxController {
     fetchOrders();
   }
 
-  // Cek apakah user adalah admin
   bool get isAdmin => box.read('role') == 'admin';
 
   Future<void> fetchOrders() async {
@@ -25,9 +25,7 @@ class HistoryController extends GetxController {
       String? token = box.read('token');
 
       final response = await http.get(
-        Uri.parse(
-          'https://nanometer-campfire-sediment.ngrok-free.dev/api/order',
-        ),
+        Uri.parse('${ApiService.baseUrl}/order'), // ✅ pakai baseUrl terpusat
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
@@ -40,8 +38,6 @@ class HistoryController extends GetxController {
 
         if (data['data'] != null && data['data'] is List) {
           orderList.value = data['data'];
-
-          // HITUNG TOTAL PENDAPATAN
           _calculateTotalRevenue();
         } else {
           orderList.value = [];
@@ -58,10 +54,15 @@ class HistoryController extends GetxController {
     }
   }
 
+  // ✅ method refresh untuk dipanggil setelah checkout
+  Future<void> refresh() async {
+    selectedTable.value = null;
+    await fetchOrders();
+  }
+
   void _calculateTotalRevenue() {
     double total = 0;
     for (var order in orderList) {
-      // Pastikan total_price dikonversi ke double
       total += double.tryParse(order['total_price'].toString()) ?? 0.0;
     }
     totalRevenue.value = total;

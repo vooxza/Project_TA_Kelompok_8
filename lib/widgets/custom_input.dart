@@ -5,6 +5,7 @@ class CustomInput extends StatelessWidget {
   final String label;
   final String hint;
   final TextInputType keyboardType;
+  final int maxLines;
 
   const CustomInput({
     super.key,
@@ -12,6 +13,7 @@ class CustomInput extends StatelessWidget {
     required this.label,
     required this.hint,
     this.keyboardType = TextInputType.text,
+    this.maxLines = 1, // ✅ default 1 baris, tidak merusak yang lain
   });
 
   @override
@@ -24,7 +26,11 @@ class CustomInput extends StatelessWidget {
         TextField(
           controller: controller,
           keyboardType: keyboardType,
-          decoration: InputDecoration(hintText: hint),
+          maxLines: maxLines,
+          decoration: InputDecoration(
+            hintText: hint,
+            alignLabelWithHint: true, // ✅ label rata atas saat multiline
+          ),
         ),
       ],
     );

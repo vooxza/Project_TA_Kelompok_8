@@ -20,10 +20,11 @@ class AddMenuPage extends GetView<AddMenuController> {
           onPressed: () => Get.back(),
         ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            // Gambar
             Obx(
               () => ImagePickerBox(
                 imagePath: controller.selectedImage.value,
@@ -33,6 +34,7 @@ class AddMenuPage extends GetView<AddMenuController> {
 
             const SizedBox(height: 20),
 
+            // Nama
             CustomInput(
               controller: controller.nameController,
               label: "Nama",
@@ -41,9 +43,20 @@ class AddMenuPage extends GetView<AddMenuController> {
 
             const SizedBox(height: 15),
 
+            // Deskripsi
+            CustomInput(
+              controller: controller.descriptionController,
+              label: "Deskripsi",
+              hint: "Deskripsi menu (opsional)",
+              maxLines: 3,
+            ),
+
+            const SizedBox(height: 15),
+
+            // Kategori
             Obx(() {
               return CustomDropdown<int>(
-                label: "Category",
+                label: "Kategori",
                 value: controller.selectedCategoryId.value,
                 items: controller.categories.map((cat) {
                   return DropdownMenuItem(value: cat.id, child: Text(cat.name));
@@ -56,16 +69,24 @@ class AddMenuPage extends GetView<AddMenuController> {
 
             const SizedBox(height: 15),
 
+            // Harga
             CustomInput(
               controller: controller.priceController,
               label: "Harga",
-              hint: "Harga",
+              hint: "Contoh: 15000",
               keyboardType: TextInputType.number,
             ),
 
             const SizedBox(height: 25),
 
-            CustomButton(text: "Simpan", onTap: controller.addMenu),
+            // Tombol simpan
+            Obx(
+              () => controller.isLoading.value
+                  ? const CircularProgressIndicator()
+                  : CustomButton(text: "Simpan", onTap: controller.addMenu),
+            ),
+
+            const SizedBox(height: 30),
           ],
         ),
       ),

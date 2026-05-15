@@ -2,7 +2,7 @@ class AppRoutes {
   static const String start = '/startingscreen';
   static const String splashscreen = '/splashscreen';
   static const String login = '/login';
-  static const String main = '/main'; // ← tambah ini
+  static const String main = '/main';
   static const String homepage = '/homepage';
   static const String menu = '/menu';
   static const String editMenu = '/edit-menu';
@@ -11,4 +11,5 @@ class AppRoutes {
   static const String payment = '/payment';
   static const String profile = '/profile';
   static const String history = '/history';
+  static const String productDetail = '/product-detail'; // ✅ tambah ini
 }

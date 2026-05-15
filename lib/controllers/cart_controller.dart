@@ -1,13 +1,14 @@
 import 'package:get/get.dart';
 import 'package:project_ta_kelompok_8/models/product_model.dart';
 import 'package:project_ta_kelompok_8/core/services/api_service.dart';
+import 'package:project_ta_kelompok_8/controllers/history_controller.dart';
 
 class CartItemModel {
   final Product product;
   RxInt quantity;
 
   CartItemModel({required this.product, required int quantity})
-    : quantity = quantity.obs;
+      : quantity = quantity.obs;
 }
 
 class CartController extends GetxController {
@@ -20,19 +21,16 @@ class CartController extends GetxController {
     final cartItem = cartItems.firstWhereOrNull(
       (item) => item.product.id == productId,
     );
-
     return cartItem?.quantity.value ?? 0;
   }
 
   void addToCart(Product item) {
     final index = cartItems.indexWhere((cart) => cart.product.id == item.id);
-
     if (index != -1) {
       cartItems[index].quantity.value++;
     } else {
       cartItems.add(CartItemModel(product: item, quantity: 1));
     }
-
     cartItems.refresh();
   }
 
@@ -46,7 +44,6 @@ class CartController extends GetxController {
 
   void decrementQuantity(int productId) {
     final index = cartItems.indexWhere((cart) => cart.product.id == productId);
-
     if (index != -1) {
       if (cartItems[index].quantity.value > 1) {
         cartItems[index].quantity.value--;
@@ -82,7 +79,6 @@ class CartController extends GetxController {
         return;
       }
 
-      // Validasi meja sudah ada, tapi data ini harus dikirim ke API
       if (selectedTable.value == null) {
         Get.snackbar('Error', 'Pilih meja dulu');
         return;
@@ -106,7 +102,12 @@ class CartController extends GetxController {
       );
 
       clearCart();
-      Get.snackbar('Success', 'Order berhasil dibuat');
+
+      // ✅ Refresh history setelah checkout berhasil
+      final historyController = Get.find<HistoryController>();
+      await historyController.refresh();
+
+      Get.snackbar('Sukses', 'Order berhasil dibuat');
     } catch (e) {
       Get.snackbar('Error', 'Gagal checkout: $e');
     } finally {

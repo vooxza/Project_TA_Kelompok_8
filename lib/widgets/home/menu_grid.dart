@@ -6,11 +6,11 @@ import '../../controllers/menu_controller.dart';
 import '../../routes/app_routes.dart';
 
 class MenuGrid extends StatelessWidget {
-  final int? selectedCategoryId;
+  final String? selectedCategoryName;
 
   const MenuGrid({
     super.key,
-    this.selectedCategoryId,
+    this.selectedCategoryName,
   });
 
   @override
@@ -18,18 +18,30 @@ class MenuGrid extends StatelessWidget {
     final menuController = Get.find<MenuController>();
 
     return Obx(() {
-      final filteredItems = selectedCategoryId == null
+      // Filter berdasarkan nama kategori yang dipilih
+      final filteredItems = selectedCategoryName == null
           ? menuController.menuItems
-          : menuController.menuItems
-              .where((item) => item.categoryId == selectedCategoryId)
-              .toList();
+          : menuController.menuItems.where((item) {
+              final category = menuController.categories.firstWhereOrNull(
+                (cat) => cat.name == selectedCategoryName,
+              );
+              if (category == null) return true;
+              return item.categoryId == category.id;
+            }).toList();
+
+      if (menuController.isLoading.value) {
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 40),
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
 
       if (filteredItems.isEmpty) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 40),
           child: Center(
             child: Text(
-              'No products available',
+              'Tidak ada menu tersedia',
               style: TextStyle(
                 fontSize: 16,
                 color: AppColors.textGreyLight,
@@ -41,7 +53,7 @@ class MenuGrid extends StatelessWidget {
 
       return Column(
         children: [
-          // ✅ Tombol Tambah Menu — hanya muncul untuk admin
+          // Tombol Tambah Menu — hanya admin
           if (RoleService.isAdmin)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -98,15 +110,15 @@ class MenuGrid extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         children: [
-          // Image Section
+          // Image
           ClipRRect(
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(15),
@@ -134,7 +146,7 @@ class MenuGrid extends StatelessWidget {
             ),
           ),
 
-          // Info Section
+          // Info
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(10),
@@ -173,8 +185,6 @@ class MenuGrid extends StatelessWidget {
                           color: AppColors.primaryRed,
                         ),
                       ),
-
-                      // ✅ Admin: tombol edit | User: tombol add to cart
                       if (RoleService.isAdmin)
                         GestureDetector(
                           onTap: () => Get.toNamed(
@@ -197,7 +207,7 @@ class MenuGrid extends StatelessWidget {
                       else
                         GestureDetector(
                           onTap: () {
-                            // Add to cart logic here
+                            // Add to cart logic
                           },
                           child: Container(
                             padding: const EdgeInsets.all(5),

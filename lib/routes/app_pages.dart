@@ -9,6 +9,7 @@ import 'package:project_ta_kelompok_8/pages/edit_menu_page.dart';
 import 'package:project_ta_kelompok_8/pages/add_menu_page.dart';
 import 'package:project_ta_kelompok_8/pages/cart_page.dart';
 import 'package:project_ta_kelompok_8/pages/payment_page.dart';
+import 'package:project_ta_kelompok_8/pages/product_detail.dart';
 import 'package:project_ta_kelompok_8/pages/profile_page.dart';
 import 'package:project_ta_kelompok_8/pages/splashscreen.dart';
 import 'package:project_ta_kelompok_8/pages/startingscreen.dart';
@@ -98,5 +99,11 @@ class AppPages {
       binding: HistoryBinding(),
       transition: Transition.rightToLeft,
     ),
+    GetPage(
+      name: AppRoutes.productDetail,
+      page: () => ProductDetailPage(),
+      transition: Transition.rightToLeft,
+    ),
+    
   ];
 }

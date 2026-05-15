@@ -11,6 +11,7 @@ import 'package:project_ta_kelompok_8/core/services/api_service.dart';
 class AddMenuController extends GetxController {
   late TextEditingController nameController;
   late TextEditingController priceController;
+  late TextEditingController descriptionController; // ✅
 
   var selectedImage = Rxn<String>();
   var selectedCategoryId = Rxn<int>();
@@ -26,6 +27,7 @@ class AddMenuController extends GetxController {
     super.onInit();
     nameController = TextEditingController();
     priceController = TextEditingController();
+    descriptionController = TextEditingController(); // ✅
     loadCategories();
   }
 
@@ -33,6 +35,7 @@ class AddMenuController extends GetxController {
   void onClose() {
     nameController.dispose();
     priceController.dispose();
+    descriptionController.dispose(); // ✅
     super.onClose();
   }
 
@@ -57,8 +60,8 @@ class AddMenuController extends GetxController {
 
   Future<void> requestGalleryPermission() async {
     final status = Platform.isAndroid
-    ? await Permission.storage.request()
-    : await Permission.photos.request();
+        ? await Permission.storage.request()
+        : await Permission.photos.request();
 
     if (status.isDenied) {
       Get.snackbar('Permission Denied', 'App requires gallery access');
@@ -74,8 +77,8 @@ class AddMenuController extends GetxController {
   Future<void> pickImageFromGallery() async {
     try {
       final status = Platform.isAndroid
-    ? await Permission.storage.request()
-    : await Permission.photos.request();
+          ? await Permission.storage.request()
+          : await Permission.photos.request();
 
       if (status.isGranted) {
         final XFile? pickedFile = await imagePicker.pickImage(
@@ -113,7 +116,7 @@ class AddMenuController extends GetxController {
     if (nameController.text.isEmpty ||
         priceController.text.isEmpty ||
         selectedCategoryId.value == null) {
-      Get.snackbar('Error', 'All fields are required');
+      Get.snackbar('Error', 'Nama, harga, dan kategori wajib diisi');
       return;
     }
 
@@ -121,34 +124,34 @@ class AddMenuController extends GetxController {
       isLoading.value = true;
 
       final price = double.tryParse(priceController.text) ?? 0.0;
+      final description = descriptionController.text.trim().isEmpty
+          ? null
+          : descriptionController.text.trim(); // ✅
 
       if (selectedImage.value != null) {
-        // 🔥 pakai upload gambar
         await apiService.createProductWithImage(
           nameController.text,
           price,
           0,
           selectedCategoryId.value!,
           File(selectedImage.value!),
+          description: description, // ✅
         );
       } else {
-        // fallback tanpa gambar
         final newProduct = Product(
           name: nameController.text,
-          description: null,
+          description: description, // ✅
           price: price,
           stock: 0,
           image: null,
           categoryId: selectedCategoryId.value!,
         );
-
         await menuController.addMenuItem(newProduct);
       }
 
       await menuController.loadMenuItems();
-
       Get.back();
-      Get.snackbar('Success', 'Menu berhasil ditambahkan');
+      Get.snackbar('Sukses', 'Menu berhasil ditambahkan');
     } catch (e) {
       Get.snackbar('Error', 'Gagal: $e');
     } finally {

@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'menu_controller.dart';
 
 class HomePageController extends GetxController {
   RxInt quantity = 1.obs;
@@ -38,13 +39,30 @@ class HomePageController extends GetxController {
     if (quantity.value > 1) quantity.value--;
   }
 
+  // Saat kategori dipilih, sinkron juga ke MenuController
   void selectCategory(String category) {
     selectedCategory.value = category;
+
+    // Sinkron ke MenuController supaya filter bekerja
+    final menuController = Get.find<MenuController>();
+    final matched = menuController.categories.firstWhereOrNull(
+      (cat) => cat.name == category,
+    );
+    menuController.selectedCategoryId.value = matched?.id;
   }
 
   @override
   void onInit() {
     super.onInit();
+    // Set kategori default ke yang pertama dari MenuController jika sudah load
+    ever(Get.find<MenuController>().categories, (cats) {
+      if (cats.isNotEmpty) {
+        final matched = cats.firstWhereOrNull(
+          (cat) => cat.name == selectedCategory.value,
+        );
+        Get.find<MenuController>().selectedCategoryId.value = matched?.id;
+      }
+    });
   }
 
   @override

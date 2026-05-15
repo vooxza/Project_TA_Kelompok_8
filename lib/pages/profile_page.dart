@@ -104,29 +104,6 @@ class ProfilePage extends GetView<ProfileController> {
 
                       const SizedBox(height: 40),
 
-                      /// BUTTON RIWAYAT PESANAN
-                      SizedBox(
-                        width: double.infinity,
-                        height: 55,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryRed,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            elevation: 0,
-                          ),
-                          onPressed: () => Get.toNamed(AppRoutes.history),
-                          child: const Text(
-                            "Riwayat Pesanan",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
