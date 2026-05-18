@@ -35,6 +35,6 @@ class ProfileController extends GetxController {
     );
 
     // 3. Arahkan ke halaman login dan hapus semua history navigasi
-    Get.offAllNamed(AppRoutes.login);
+    Get.offAllNamed(AppRoutes.start);
   }
 }

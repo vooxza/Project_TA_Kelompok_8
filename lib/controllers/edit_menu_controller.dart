@@ -2,7 +2,6 @@ import 'package:flutter/material.dart' hide MenuController;
 import 'package:get/get.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../controllers/menu_controller.dart';
 import '../widgets/dialog_button.dart';
 import '../models/category_model.dart';
@@ -10,6 +9,7 @@ import '../models/category_model.dart';
 class EditMenuController extends GetxController {
   late TextEditingController nameController;
   late TextEditingController priceController;
+  late TextEditingController descriptionController;
 
   var selectedImage = Rxn<String>();
   final ImagePicker imagePicker = ImagePicker();
@@ -27,12 +27,13 @@ class EditMenuController extends GetxController {
 
     nameController = TextEditingController();
     priceController = TextEditingController();
-
+    descriptionController = TextEditingController();
     final args = Get.arguments;
 
     if (args != null) {
       menuId = args['id'] as int?;
       nameController.text = args['name'] ?? '';
+      descriptionController.text = args['description'] ?? '';
       selectedCategoryId.value = args['category_id'];
       priceController.text = args['price']?.toString() ?? '';
       selectedImage.value = args['image'];
@@ -43,6 +44,7 @@ class EditMenuController extends GetxController {
   @override
   void onClose() {
     nameController.dispose();
+    descriptionController.dispose();
     priceController.dispose();
     super.onClose();
   }
@@ -54,42 +56,36 @@ class EditMenuController extends GetxController {
   Future<void> loadCategories() async {
     final result = await menuController.apiService.getCategories();
     categories.value = result;
+    final exists = categories.any((cat) => cat.id == selectedCategoryId.value);
+
+    if (!exists && categories.isNotEmpty) {
+      selectedCategoryId.value = categories.first.id;
+    }
+    update();
   }
 
   Future<void> pickImageFromGallery() async {
     try {
-      final status = Platform.isAndroid
-          ? await Permission.storage.request()
-          : await Permission.photos.request();
+      final XFile? pickedFile = await imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
 
-      if (status.isGranted) {
-        final XFile? pickedFile = await imagePicker.pickImage(
-          source: ImageSource.gallery,
-          imageQuality: 80,
-        );
-        if (pickedFile != null) {
-          selectedImage.value = pickedFile.path;
-          Get.snackbar(
-            'Success',
-            'Image selected',
-            snackPosition: SnackPosition.TOP,
-          );
-        }
-      } else if (status.isDenied) {
-        Get.snackbar('Permission Denied', 'Gallery access required');
-      } else if (status.isPermanentlyDenied) {
+      if (pickedFile != null) {
+        selectedImage.value = pickedFile.path;
+
         Get.snackbar(
-          'Permission Required',
-          'Please enable gallery access in settings',
+          'Success',
+          'Image selected',
+          snackPosition: SnackPosition.TOP,
         );
       }
     } catch (e) {
       debugPrint('Error picking image: $e');
       Get.snackbar(
         'Error',
-        'Failed to select image: $e',
+        'Failed to select image',
         snackPosition: SnackPosition.TOP,
-        duration: const Duration(seconds: 3),
       );
     }
   }
@@ -114,6 +110,7 @@ class EditMenuController extends GetxController {
         await menuController.apiService.updateProductWithImage(
           menuId!,
           nameController.text,
+          descriptionController.text,
           price,
           0,
           selectedCategoryId.value!,

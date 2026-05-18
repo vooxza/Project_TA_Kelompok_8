@@ -278,6 +278,7 @@ class ApiService {
   Future<Product> updateProductWithImage(
     int id,
     String name,
+    String? description,
     double price,
     int stock,
     int categoryId,
@@ -298,6 +299,7 @@ class ApiService {
 
       request.fields['_method'] = 'PUT';
       request.fields['name'] = name;
+      request.fields['description'] = description ?? '';
       request.fields['price'] = price.toInt().toString();
       request.fields['stock'] = stock.toString();
       request.fields['category_id'] = categoryId.toString();

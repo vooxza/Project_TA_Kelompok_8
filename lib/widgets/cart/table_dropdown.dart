@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../../../../core/theme/app_colors.dart';
 import '../../controllers/cart_controller.dart';
 
 class TableDropdown extends StatelessWidget {
   final CartController controller;
 
-  const TableDropdown({super.key, required this.controller});
+  const TableDropdown({
+    super.key,
+    required this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,25 +23,29 @@ class TableDropdown extends StatelessWidget {
     ];
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: AppColors.bgGreyLight,
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.bgGrey,
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Obx(
         () => DropdownButton<String>(
-          isExpanded: true,
           value: controller.selectedTable.value,
-          hint: const Text("Pilih Nomor Meja"),
+          isExpanded: true,
+          hint: const Text(
+            "Pilih Nomor Meja",
+          ),
           underline: const SizedBox(),
-          items: mejaList
-              .map((e) => DropdownMenuItem(
-                    value: e,
-                    child: Text(e),
-                  ))
-              .toList(),
-          onChanged: (value) =>
-              controller.selectedTable.value = value,
+          borderRadius: BorderRadius.circular(18),
+          items: mejaList.map((table) {
+            return DropdownMenuItem(
+              value: table,
+              child: Text(table),
+            );
+          }).toList(),
+          onChanged: (value) {
+            controller.selectedTable.value = value;
+          },
         ),
       ),
     );

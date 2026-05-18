@@ -1,18 +1,22 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_ta_kelompok_8/models/product_model.dart';
-import 'package:project_ta_kelompok_8/models/category_model.dart' as cat;
+import 'package:project_ta_kelompok_8/models/category_model.dart'
+    as cat;
 import 'package:project_ta_kelompok_8/core/services/api_service.dart';
 
 class MenuController extends GetxController {
+  final apiService = ApiService();
   var menuItems = <Product>[].obs;
-  var isLoading = false.obs;
 
   var categories = <cat.Category>[].obs;
   var selectedCategoryId = Rxn<int>();
 
+  final searchController = TextEditingController();
+  var searchQuery = ''.obs;
+  var isLoading = false.obs;
   var errorMessage = ''.obs;
-  final apiService = ApiService();
 
   @override
   void onInit() {
@@ -27,17 +31,20 @@ class MenuController extends GetxController {
 
   List<Product> get filteredMenu {
     debugPrint('=== filteredMenu called ===');
-    debugPrint('selectedCategoryId: ${selectedCategoryId.value}');
-    debugPrint('menuItems count: ${menuItems.length}');
 
-    if (selectedCategoryId.value == null) return menuItems;
+    return menuItems.where((item) {
+      /// FILTER CATEGORY
+      final matchCategory =
+          selectedCategoryId.value == null ||
+          item.categoryId == selectedCategoryId.value;
 
-    final filtered = menuItems
-        .where((item) => item.categoryId == selectedCategoryId.value)
-        .toList();
+      /// FILTER SEARCH
+      final matchSearch = item.name
+          .toLowerCase()
+          .contains(searchQuery.value.toLowerCase());
 
-    debugPrint('filtered count: ${filtered.length}');
-    return filtered;
+      return matchCategory && matchSearch;
+    }).toList();
   }
 
   Future<void> loadCategories() async {
@@ -49,7 +56,10 @@ class MenuController extends GetxController {
         selectedCategoryId.value = categories.first.id;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Gagal load category');
+      Get.snackbar(
+        'Error',
+        'Gagal load category',
+      );
     }
   }
 
@@ -81,6 +91,7 @@ class MenuController extends GetxController {
       item.price,
       item.stock,
       item.categoryId,
+      description: item.description,
     );
     await loadMenuItems();
   }
@@ -92,7 +103,13 @@ class MenuController extends GetxController {
       item.price,
       item.stock,
       item.categoryId,
+      description: item.description,
     );
     await loadMenuItems();
+  }
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
   }
 }

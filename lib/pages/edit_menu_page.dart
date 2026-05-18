@@ -55,6 +55,15 @@ class EditMenuPage extends GetView<EditMenuController> {
 
             const SizedBox(height: 15),
 
+            CustomInput(
+              controller: controller.descriptionController,
+              label: "Deskripsi",
+              hint: "Deskripsi menu (opsional)",
+              maxLines: 3,
+            ),
+
+            const SizedBox(height: 15),
+
             /// DROPDOWN CATEGORY
             Obx(() => CustomDropdown<int>(
                   label: "Category",

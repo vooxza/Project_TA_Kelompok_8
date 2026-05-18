@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../core/theme/app_colors.dart';
-import '../../routes/app_routes.dart';
+
 import '../../controllers/cart_controller.dart';
 import '../../core/services/api_service.dart';
 import '../../core/services/role_service.dart';
+import '../../core/theme/app_colors.dart';
+import '../../routes/app_routes.dart';
 import '../../widgets/cart/cart_badge_button.dart';
 
 class MenuCard extends StatelessWidget {
@@ -19,69 +20,102 @@ class MenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.textWhite,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-          ),
-        ],
+    return GestureDetector(
+      onTap: () => Get.toNamed(
+        AppRoutes.productDetail,
+        arguments: item,
       ),
-      child: Column(
-        children: [
-          /// IMAGE
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(15),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.textWhite,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.textBlack.withOpacity(0.07),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            child: Stack(
-              children: [
-                SizedBox(
-                  height: 120,
-                  width: double.infinity,
-                  child: item.image != null && item.image!.isNotEmpty
-                      ? Image.network(
-                          item.image!.startsWith('http')
-                              ? item.image!
-                              : '${ApiService.baseUrl.replaceAll('/api', '')}${item.image}',
-                          fit: BoxFit.cover,
-                        )
-                      : const Icon(Icons.fastfood, size: 40),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// IMAGE
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
                 ),
-
-                // ✅ Tombol edit hanya untuk admin
-                if (RoleService.isAdmin)
-                  Positioned(
-                    top: 6,
-                    right: 6,
-                    child: IconButton(
-                      icon: const Icon(Icons.edit, size: 16),
-                      color: AppColors.textWhite,
-                      style: IconButton.styleFrom(
-                        backgroundColor: AppColors.primaryRed,
-                      ),
-                      onPressed: () => Get.toNamed(
-                        AppRoutes.editMenu,
-                        arguments: {
-                          'id': item.id,
-                          'name': item.name,
-                          'price': item.price,
-                          'image': item.image,
-                        },
-                      ),
+                child: Stack(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: item.image != null && item.image!.isNotEmpty
+                          ? Image.network(
+                              item.image!.startsWith('http')
+                                  ? item.image!
+                                  : '${ApiService.baseUrl.replaceAll('/api', '')}${item.image}',
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                color: AppColors.bgGrey,
+                                child: const Icon(
+                                  Icons.fastfood,
+                                  size: 40,
+                                  color: AppColors.textGrey,
+                                ),
+                              ),
+                            )
+                          : Container(
+                              color: AppColors.bgGrey,
+                              child: const Icon(
+                                Icons.fastfood,
+                                size: 40,
+                                color: AppColors.textGrey,
+                              ),
+                            ),
                     ),
-                  ),
-              ],
-            ),
-          ),
 
-          /// INFO
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(10),
+                    /// EDIT BUTTON (ADMIN ONLY)
+                    if (RoleService.isAdmin)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: GestureDetector(
+                          onTap: () => Get.toNamed(
+                            AppRoutes.editMenu,
+                            arguments: {
+                              'id': item.id,
+                              'name': item.name,
+                              'description': item.description,
+                              'category_id': item.categoryId,
+                              'price': item.price,
+                              'image': item.image,
+                            },
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryRed,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.edit,
+                              color: AppColors.textWhite,
+                              size: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+
+            /// INFO
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -89,10 +123,14 @@ class MenuCard extends StatelessWidget {
                     item.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: AppColors.textBlack,
+                    ),
                   ),
 
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
 
                   Text(
                     item.description ?? '',
@@ -100,9 +138,11 @@ class MenuCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 11,
-                      color: Colors.grey,
+                      color: AppColors.textGreyLight,
                     ),
                   ),
+
+                  const SizedBox(height: 8),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -112,9 +152,11 @@ class MenuCard extends StatelessWidget {
                         style: const TextStyle(
                           color: AppColors.primaryRed,
                           fontWeight: FontWeight.bold,
+                          fontSize: 13,
                         ),
                       ),
 
+                      /// CART BUTTON + BADGE
                       CartBadgeButton(
                         item: item,
                         cartController: cartController,
@@ -124,8 +166,8 @@ class MenuCard extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

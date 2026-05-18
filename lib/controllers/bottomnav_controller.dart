@@ -5,7 +5,7 @@ class BottomNavController extends GetxController {
 
   void goTo(int index) {
     if (currentIndex.value == index) return;
-    currentIndex.value = index; // ← cukup ganti index, tidak perlu navigasi
+    currentIndex.value = index;
   }
 
   void goToForce(int index) {

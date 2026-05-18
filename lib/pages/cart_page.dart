@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../core/theme/app_colors.dart';
+
 import '../controllers/cart_controller.dart';
+import '../core/theme/app_colors.dart';
+import '../widgets/cart/cart_empty.dart';
 import '../widgets/cart/cart_list.dart';
 import '../widgets/cart/cart_summary.dart';
-import '../widgets/bottom_nav_bar.dart';
 
-class CartPage extends StatelessWidget {
+class CartPage extends GetView<CartController> {
   const CartPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<CartController>();
-
     return Scaffold(
       backgroundColor: AppColors.bgGrey,
       appBar: AppBar(
@@ -33,25 +32,17 @@ class CartPage extends StatelessWidget {
           return Column(
             children: [
               const SizedBox(height: 20),
-
-              /// LIST CART
               Expanded(
                 child: controller.cartItems.isEmpty
-                    ? const Center(
-                        child: Text(
-                          "Belum ada menu di keranjang",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppColors.textGrey,
-                          ),
-                        ),
-                      )
-                    : CartList(controller: controller),
-              ),
+                    ? const CartEmpty()
+                    : Column(
+                        children: [
+                          Expanded(child: CartList(controller: controller)),
 
-              /// SUMMARY
-              if (controller.cartItems.isNotEmpty)
-                CartSummary(controller: controller),
+                          CartSummary(controller: controller),
+                        ],
+                      ),
+              ),
             ],
           );
         }),

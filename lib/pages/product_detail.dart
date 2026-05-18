@@ -100,6 +100,8 @@ class ProductDetailPage extends StatelessWidget {
                               arguments: {
                                 'id': item.id,
                                 'name': item.name,
+                                'description': item.description,
+                                'category_id': item.categoryId,
                                 'price': item.price,
                                 'image': item.image,
                               },
@@ -185,8 +187,6 @@ class ProductDetailPage extends StatelessWidget {
 
                   const Spacer(),
 
-                  // ── Tombol ORDER NOW — user only ──
-                  if (!RoleService.isAdmin)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 24),
                       child: Row(
@@ -252,7 +252,6 @@ class ProductDetailPage extends StatelessWidget {
                       ),
                     ),
 
-                  if (RoleService.isAdmin) const SizedBox(height: 24),
                 ],
               ),
             ),

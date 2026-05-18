@@ -11,5 +11,5 @@ class AppRoutes {
   static const String payment = '/payment';
   static const String profile = '/profile';
   static const String history = '/history';
-  static const String productDetail = '/product-detail'; // ✅ tambah ini
+  static const String productDetail = '/product-detail';
 }

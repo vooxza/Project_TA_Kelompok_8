@@ -22,24 +22,23 @@ class Product {
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
-    // Handle both camelCase and snake_case keys from API
     final price = json['price'];
     double parsedPrice = 0.0;
-    
+
     if (price is String) {
       parsedPrice = double.tryParse(price) ?? 0.0;
     } else if (price is num) {
       parsedPrice = price.toDouble();
     }
-    
+    final category = json['categoryId'] ?? json['category_id'];
     return Product(
-      id: json['id'] as int?,
-      name: json['name'] as String? ?? '',
-      description: json['description'] as String?,
+      id: json['id'],
+      name: json['name'] ?? '',
+      description: json['description']?.toString(),
       price: parsedPrice,
-      stock: json['stock'] as int? ?? 0,
-      image: json['image'] as String?,
-      categoryId: (json['categoryId'] ?? json['category_id'] ?? 0) as int,
+      stock: int.tryParse(json['stock'].toString()) ?? 0,
+      image: json['image']?.toString(),
+      categoryId: int.tryParse(category.toString()) ?? 0,
       createdAt: _parseDateTime(json['createdAt'] ?? json['created_at']),
       updatedAt: _parseDateTime(json['updatedAt'] ?? json['updated_at']),
     );
