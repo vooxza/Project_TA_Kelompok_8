@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../controllers/cart_controller.dart';
 import '../product_card2.dart';
 
@@ -27,16 +26,9 @@ class CartList extends StatelessWidget {
             description: item.product.description ?? '',
             price: item.product.price.toStringAsFixed(0),
             quantity: item.quantity.value,
-            onAdd: () {
-              controller.incrementQuantity(
-                item.product.id ?? 0,
-              );
-            },
-            onRemove: () {
-              controller.decrementQuantity(
-                item.product.id ?? 0,
-              );
-            },
+            image: item.product.image, // ✅ kirim gambar dari product
+            onAdd: () => controller.incrementQuantity(item.product.id ?? 0),
+            onRemove: () => controller.decrementQuantity(item.product.id ?? 0),
           ),
         );
       },

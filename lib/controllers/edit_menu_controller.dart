@@ -97,7 +97,6 @@ class EditMenuController extends GetxController {
     }
 
     final price = double.tryParse(priceController.text) ?? 0.0;
-
     File? imageFile;
 
     if (selectedImage.value != null &&
@@ -120,7 +119,8 @@ class EditMenuController extends GetxController {
 
       await menuController.loadMenuItems();
 
-      Get.back();
+      // ← balik sampai ke MainPage (MenuPage), skip ProductDetailPage
+      Get.until((route) => route.settings.name == '/main');
       Get.snackbar('Success', 'Menu berhasil diupdate');
     } catch (e) {
       Get.snackbar('Error', 'Gagal update: $e');
@@ -137,9 +137,11 @@ class EditMenuController extends GetxController {
         textCancel: "Batal",
         textConfirm: "Hapus",
         buttonColor: const Color(0xFFB71C1C),
-        onConfirm: () {
-          menuController.deleteMenuItem(menuId!);
-          Get.back();
+        onConfirm: () async {
+          await menuController.deleteMenuItem(menuId!);
+
+          // ← tutup dialog + balik sampai ke MainPage, skip ProductDetailPage
+          Get.until((route) => route.settings.name == '/main');
           Get.snackbar(
             'Success',
             'Menu berhasil dihapus',

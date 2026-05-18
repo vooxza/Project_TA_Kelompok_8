@@ -1,23 +1,30 @@
-import 'package:flutter/material.dart'
-    hide MenuController;
-
+import 'package:flutter/material.dart' hide MenuController;
 import 'package:get/get.dart';
-
 import '../../controllers/menu_controller.dart';
 import '../../core/theme/app_colors.dart';
 
-class MenuSearch extends StatelessWidget {
-  MenuSearch({super.key});
+class MenuSearch extends StatefulWidget {
+  const MenuSearch({super.key});
 
-  final MenuController controller =
-      Get.find<MenuController>();
+  @override
+  State<MenuSearch> createState() => _MenuSearchState();
+}
+
+class _MenuSearchState extends State<MenuSearch> {
+  final MenuController controller = Get.find<MenuController>();
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _focusNode.unfocus(); // ← unfocus saat widget di-dispose (navigasi keluar)
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         height: 52,
         decoration: BoxDecoration(
@@ -26,13 +33,14 @@ class MenuSearch extends StatelessWidget {
         ),
         child: TextField(
           controller: controller.searchController,
+          focusNode: _focusNode, // ← pakai focusNode ini
 
           onChanged: (value) {
             controller.searchQuery.value = value;
           },
 
           onTapOutside: (_) {
-            FocusScope.of(context).unfocus();
+            _focusNode.unfocus(); // ← unfocus pakai focusNode sendiri
           },
 
           cursorColor: AppColors.primaryRed,
@@ -44,25 +52,11 @@ class MenuSearch extends StatelessWidget {
           ),
 
           decoration: const InputDecoration(
-            border: OutlineInputBorder(
-              borderSide: BorderSide.none,
-            ),
-
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide.none,
-            ),
-
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide.none,
-            ),
-
-            prefixIcon: Icon(
-              Icons.search_rounded,
-              color: AppColors.textGrey,
-            ),
-
+            border: OutlineInputBorder(borderSide: BorderSide.none),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
+            focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
+            prefixIcon: Icon(Icons.search_rounded, color: AppColors.textGrey),
             hintText: 'Cari menu...',
-
             hintStyle: TextStyle(
               color: AppColors.textGreyLight,
               fontSize: 14,
