@@ -132,49 +132,70 @@ class PaymentPage extends StatelessWidget {
   /// =========================
   /// BUTTON BAYAR
   /// =========================
-  Widget _buildPayButton(CartController cart) {
-    return GestureDetector(
-      onTap: () async {
-        await cart.checkout(1); // userId sementara
-
-        // tampilkan dialog setelah sukses
-        _showSuccessDialog(cart);
-      },
+  // BUTTON BAYAR - jangan clearCart di dalam checkout, pindah ke dialog
+Widget _buildPayButton(CartController cart) {
+  return Obx(
+    () => GestureDetector(
+      onTap: cart.isLoading.value
+          ? null // ← disable saat loading
+          : () async {
+              await cart.checkout(1);
+              _showSuccessDialog(cart);
+            },
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFFEB6B7C),
+          color: cart.isLoading.value
+              ? Colors.grey // ← visual feedback loading
+              : const Color(0xFFEB6B7C),
           borderRadius: BorderRadius.circular(35),
         ),
-        child: const Center(
-          child: Text(
-            "SAYA SUDAH BAYAR",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
+        child: Center(
+          child: cart.isLoading.value
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : const Text(
+                  "SAYA SUDAH BAYAR",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   /// =========================
   /// DIALOG BATAL
   /// =========================
-  void _showCancelDialog(CartController cart) {
-    Get.dialog(
-      CustomDialog(
-        title: "Batalkan Pesanan?",
-        message: "Apakah yakin ingin membatalkan pesanan ini?",
-        textCancel: "Tidak",
-        textConfirm: "Ya, Batalkan",
-        onConfirm: () {
-          cart.clearCart();
-          final nav = Get.find<BottomNavController>();
-          nav.goToForce(0);
-        },
-      ),
-    );
-  }
+  // DIALOG BATAL - tambah Get.back() di onCancel
+void _showCancelDialog(CartController cart) {
+  Get.dialog(
+    CustomDialog(
+      title: "Batalkan Pesanan?",
+      message: "Apakah yakin ingin membatalkan pesanan ini?",
+      textCancel: "Tidak",
+      textConfirm: "Ya, Batalkan",
+      onCancel: () => Get.back(), // ← TAMBAH INI
+      onConfirm: () {
+        Get.back(); // tutup dialog dulu
+        cart.clearCart();
+        final nav = Get.find<BottomNavController>();
+        nav.goToForce(0);
+        Get.offAllNamed(AppRoutes.main);
+      },
+    ),
+  );
+}
 
   /// =========================
   /// DIALOG SUCCESS (PAKAI CUSTOM DIALOG)

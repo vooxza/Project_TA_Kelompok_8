@@ -8,7 +8,7 @@ class CartItemModel {
   RxInt quantity;
 
   CartItemModel({required this.product, required int quantity})
-      : quantity = quantity.obs;
+    : quantity = quantity.obs;
 }
 
 class CartController extends GetxController {
@@ -72,16 +72,17 @@ class CartController extends GetxController {
     return 'Rp $result';
   }
 
-  Future<void> checkout(int userId) async {
+  // Ubah return type jadi Future<bool> agar PaymentPage tahu sukses/gagal
+  Future<bool> checkout(int userId) async {
     try {
       if (cartItems.isEmpty) {
         Get.snackbar('Error', 'Cart kosong');
-        return;
+        return false;
       }
 
       if (selectedTable.value == null) {
         Get.snackbar('Error', 'Pilih meja dulu');
-        return;
+        return false;
       }
 
       isLoading.value = true;
@@ -98,18 +99,17 @@ class CartController extends GetxController {
       await apiService.createOrder(
         totalPrice: totalPrice,
         items: items,
-        tableNumber: selectedTable.value!,
+        tableNumber: selectedTable.value!.trim(), // ← trim whitespace
       );
 
-      clearCart();
-
-      // ✅ Refresh history setelah checkout berhasil
+      // ✅ JANGAN clearCart di sini, biarkan dialog yang handle
       final historyController = Get.find<HistoryController>();
       await historyController.refresh();
 
-      Get.snackbar('Sukses', 'Order berhasil dibuat');
+      return true; // ← kembalikan true jika sukses
     } catch (e) {
       Get.snackbar('Error', 'Gagal checkout: $e');
+      return false; // ← kembalikan false jika gagal
     } finally {
       isLoading.value = false;
     }
