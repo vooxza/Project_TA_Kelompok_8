@@ -108,8 +108,11 @@ class HistoryPage extends GetView<HistoryController> {
 
         return Column(
           children: [
-            // Revenue card — hanya admin
+            // Revenue card admin → semua waktu
             if (controller.isAdmin) _buildRevenueCard(filteredOrders),
+
+            // Revenue card user/kasir → hari ini saja
+            if (!controller.isAdmin) _buildUserRevenueCard(filteredOrders),
 
             // Label filter aktif
             if (controller.selectedTable.value != null)
@@ -188,6 +191,9 @@ class HistoryPage extends GetView<HistoryController> {
     );
   }
 
+  // =============================================================
+  // ADMIN: Total pendapatan semua waktu
+  // =============================================================
   Widget _buildRevenueCard(List filteredOrders) {
     final total = filteredOrders.fold<double>(
       0,
@@ -237,6 +243,99 @@ class HistoryPage extends GetView<HistoryController> {
     );
   }
 
+  // =============================================================
+  // USER / KASIR: Total pendapatan hari ini saja
+  // =============================================================
+  Widget _buildUserRevenueCard(List filteredOrders) {
+    // Filter hanya order hari ini
+    final todayOrders = filteredOrders
+        .where((order) => _isToday(order['created_at']?.toString()))
+        .toList();
+
+    final total = todayOrders.fold<double>(
+      0,
+      (sum, order) =>
+          sum + (double.tryParse(order['total_price'].toString()) ?? 0.0),
+    );
+
+    final now = DateTime.now();
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+    ];
+    final todayLabel = '${now.day} ${months[now.month - 1]} ${now.year}';
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.primaryRed, Color(0xFFB71C1C)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryRed.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Label
+          Row(
+            children: [
+              const Icon(Icons.today, color: Colors.white70, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                controller.selectedTable.value == null
+                    ? "Pendapatan Hari Ini (Semua Meja)"
+                    : "Pendapatan Hari Ini (${controller.selectedTable.value})",
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Nominal
+          Text(
+            controller.formatRupiah(total),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 6),
+
+          // Jumlah transaksi + tanggal
+          Row(
+            children: [
+              const Icon(
+                Icons.receipt_outlined,
+                color: Colors.white54,
+                size: 14,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '${todayOrders.length} transaksi · $todayLabel',
+                style: const TextStyle(color: Colors.white54, fontSize: 12),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // =============================================================
+  // ORDER CARD
+  // =============================================================
   Widget _buildOrderCard(dynamic order) {
     List items = order['items'] ?? [];
     final String invoiceNumber = order['order_number'] ?? '-';
@@ -413,7 +512,7 @@ class HistoryPage extends GetView<HistoryController> {
 
                 const SizedBox(height: 8),
 
-                // ✅ Tanggal pembayaran
+                // Tanggal pembayaran
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -450,6 +549,24 @@ class HistoryPage extends GetView<HistoryController> {
         ],
       ),
     );
+  }
+
+  // =============================================================
+  // HELPERS
+  // =============================================================
+
+  /// Cek apakah tanggal ISO adalah hari ini
+  bool _isToday(String? isoDate) {
+    if (isoDate == null) return false;
+    try {
+      final dt = DateTime.parse(isoDate).toLocal();
+      final now = DateTime.now();
+      return dt.year == now.year &&
+          dt.month == now.month &&
+          dt.day == now.day;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Format ISO date → "11 Mei 2026, 09:28"
