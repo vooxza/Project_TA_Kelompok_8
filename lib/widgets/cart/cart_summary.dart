@@ -1,85 +1,148 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../routes/app_routes.dart';
-
 import '../../controllers/cart_controller.dart';
+import '../../core/theme/app_colors.dart';
+import '../../routes/app_routes.dart';
 import 'table_dropdown.dart';
 
 class CartSummary extends StatelessWidget {
   final CartController controller;
-
-  const CartSummary({
-    super.key,
-    required this.controller,
-  });
+  const CartSummary({required this.controller});
 
   @override
   Widget build(BuildContext context) {
+    final mejaList = ['Meja 1', 'Meja 2', 'Meja 3', 'Meja 4', 'Meja 5'];
+
     return Container(
-      padding: const EdgeInsets.all(20),
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
       decoration: BoxDecoration(
-        color: AppColors.textWhite,
-        borderRadius: BorderRadius.circular(28),
+        color: AppColors.bgWhite,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(28),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 15,
-            offset: const Offset(0, -2),
+            color: AppColors.shadowDark,
+            blurRadius: 20,
+            offset: const Offset(0, -4),
           ),
         ],
       ),
       child: Column(
         children: [
-          TableDropdown(
-            controller: controller,
+          // Table selector
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppColors.bgSurfaceLight,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.borderLight, width: 1.5),
+            ),
+            child: Obx(
+              () => DropdownButton<String>(
+                value: controller.selectedTable.value,
+                isExpanded: true,
+                hint: Row(
+                  children: const [
+                    Icon(
+                      Icons.table_restaurant_rounded,
+                      size: 18,
+                      color: AppColors.textLight,
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      'Pilih Nomor Meja',
+                      style: TextStyle(
+                        color: AppColors.textLight,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                underline: const SizedBox.shrink(),
+                borderRadius: BorderRadius.circular(16),
+                icon: const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: AppColors.textLight,
+                ),
+                items: mejaList.map((table) {
+                  return DropdownMenuItem(
+                    value: table,
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.table_restaurant_rounded,
+                          size: 18,
+                          color: AppColors.primaryRed,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          table,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) => controller.selectedTable.value = value,
+              ),
+            ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
+          // Price row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                "Total Harga",
+                'Total Harga',
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: AppColors.textMedium,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-
-              Text(
-                controller.formatRupiah(
-                  controller.totalPrice,
-                ),
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.primaryRed,
+              Obx(
+                () => Text(
+                  controller.formatRupiah(controller.totalPrice),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primaryRed,
+                    letterSpacing: -0.5,
+                  ),
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
+          // Checkout button
           SizedBox(
             width: double.infinity,
-            height: 56,
+            height: 54,
             child: ElevatedButton(
               onPressed: () {
                 if (controller.selectedTable.value == null) {
                   Get.snackbar(
-                    "Peringatan",
-                    "Silakan pilih nomor meja",
+                    'Pilih Meja',
+                    'Silakan pilih nomor meja terlebih dahulu',
                     backgroundColor: AppColors.warning,
                     colorText: AppColors.textWhite,
+                    snackPosition: SnackPosition.TOP,
+                    margin: const EdgeInsets.all(12),
+                    borderRadius: 12,
                   );
                   return;
                 }
-
                 Get.toNamed(AppRoutes.payment);
               },
               style: ElevatedButton.styleFrom(
@@ -89,16 +152,29 @@ class CartSummary extends StatelessWidget {
                   borderRadius: BorderRadius.circular(18),
                 ),
               ),
-              child: const Text(
-                "Lanjut Pembayaran",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textWhite,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    'Lanjut Pembayaran',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textWhite,
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    color: AppColors.textWhite,
+                    size: 18,
+                  ),
+                ],
               ),
             ),
           ),
+
+          const SizedBox(height: 8),
         ],
       ),
     );

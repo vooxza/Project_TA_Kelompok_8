@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/cart_controller.dart';
-import '../product_card2.dart';
+import 'cart_item_card.dart';
 
 class CartList extends StatelessWidget {
   final CartController controller;
@@ -14,21 +14,34 @@ class CartList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      padding: const EdgeInsets.fromLTRB(
+        20,
+        8,
+        20,
+        20,
+      ),
       itemCount: controller.cartItems.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      separatorBuilder: (_, __) =>
+          const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final item = controller.cartItems[index];
 
         return Obx(
-          () => ProductCard2(
+          () => CartItemCard(
             title: item.product.name,
-            description: item.product.description ?? '',
-            price: item.product.price.toStringAsFixed(0),
+            description:
+                item.product.description ?? '',
+            price: item.product.price,
             quantity: item.quantity.value,
-            image: item.product.image, // ✅ kirim gambar dari product
-            onAdd: () => controller.incrementQuantity(item.product.id ?? 0),
-            onRemove: () => controller.decrementQuantity(item.product.id ?? 0),
+            image: item.product.image,
+            onAdd: () =>
+                controller.incrementQuantity(
+              item.product.id ?? 0,
+            ),
+            onRemove: () =>
+                controller.decrementQuantity(
+              item.product.id ?? 0,
+            ),
           ),
         );
       },

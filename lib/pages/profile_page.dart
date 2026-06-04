@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../controllers/profile_controller.dart';
 import '../core/theme/app_colors.dart';
 
@@ -10,225 +9,161 @@ class ProfilePage extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgGrey,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    _buildProfileCard(),
-
-                    const SizedBox(height: 20),
-
-                    _buildInfoSection(),
-                  ],
-                ),
-              ),
-            ),
-
-            _buildLogoutButton(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// =======================
-  /// HEADER
-  /// =======================
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 20, 10),
-      child: Row(
+      backgroundColor: AppColors.bgCream,
+      body: Column(
         children: [
-          GestureDetector(
-            onTap: Get.back,
-            child: Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: AppColors.textWhite,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                size: 18,
-                color: AppColors.textBlack,
+          // Hero header
+          _ProfileHeader(controller: controller),
+
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: Column(
+                children: [
+                  _InfoCard(controller: controller),
+                  const SizedBox(height: 24),
+                  _LogoutButton(onTap: controller.logout),
+                ],
               ),
             ),
           ),
-
-          const Expanded(
-            child: Text(
-              'Profile',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textBlack,
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 42),
         ],
       ),
     );
   }
+}
 
-  /// =======================
-  /// PROFILE CARD
-  /// =======================
-  Widget _buildProfileCard() {
+// ─────────────────────────────────────────────────────────
+// HEADER
+// ─────────────────────────────────────────────────────────
+class _ProfileHeader extends StatelessWidget {
+  final ProfileController controller;
+  const _ProfileHeader({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.textWhite,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
+      padding: EdgeInsets.fromLTRB(
+        20,
+        MediaQuery.of(context).padding.top + 12,
+        20,
+        28,
+      ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF6D1212), Color(0xFF9B1B1B)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
       child: Column(
         children: [
+          Row(
+            children: [
+              GestureDetector(
+                onTap: Get.back,
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+              ),
+              const Expanded(
+                child: Text(
+                  'Profil Saya',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 40),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          // Avatar
           Container(
-            width: 110,
-            height: 110,
+            width: 88,
+            height: 88,
             decoration: BoxDecoration(
-              color: AppColors.primaryRed.withOpacity(0.08),
+              color: Colors.white.withOpacity(0.15),
               shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white.withOpacity(0.3),
+                width: 3,
+              ),
             ),
             child: const Icon(
               Icons.person_rounded,
-              size: 60,
-              color: AppColors.primaryRed,
+              size: 46,
+              color: Colors.white,
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
 
           Obx(
             () => Text(
               controller.userName.value,
-              textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 24,
+                color: Colors.white,
+                fontSize: 22,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textBlack,
+                letterSpacing: -0.5,
               ),
             ),
           ),
-
-          const SizedBox(height: 6),
-
+          const SizedBox(height: 4),
           Obx(
             () => Text(
               controller.userEmail.value,
               style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textGrey,
-                fontWeight: FontWeight.w500,
+                color: Colors.white60,
+                fontSize: 13,
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
 
-  /// =======================
-  /// INFO SECTION
-  /// =======================
-  Widget _buildInfoSection() {
-    return Column(
-      children: [
-        _buildMenuTile(
-          icon: Icons.person_outline_rounded,
-          title: 'Nama Pengguna',
-          value: controller.userName.value,
-        ),
+          const SizedBox(height: 12),
 
-        const SizedBox(height: 14),
-
-        _buildMenuTile(
-          icon: Icons.email_outlined,
-          title: 'Email',
-          value: controller.userEmail.value,
-        ),
-
-        const SizedBox(height: 14),
-
-        _buildMenuTile(
-          icon: Icons.security_rounded,
-          title: 'Status',
-          value: 'Aktif',
-        ),
-      ],
-    );
-  }
-
-  /// =======================
-  /// MENU TILE
-  /// =======================
-  Widget _buildMenuTile({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.textWhite,
-        borderRadius: BorderRadius.circular(22),
-      ),
-      child: Row(
-        children: [
+          // Active badge
           Container(
-            width: 48,
-            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.primaryRed.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(16),
+              color: AppColors.accentGold.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppColors.accentGold.withOpacity(0.4),
+              ),
             ),
-            child: Icon(
-              icon,
-              color: AppColors.primaryRed,
-            ),
-          ),
-
-          const SizedBox(width: 16),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textGrey,
-                    fontWeight: FontWeight.w500,
-                  ),
+                Icon(
+                  Icons.verified_rounded,
+                  size: 14,
+                  color: AppColors.accentGoldLight,
                 ),
-
-                const SizedBox(height: 4),
-
+                SizedBox(width: 6),
                 Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textBlack,
+                  'Akun Aktif',
+                  style: TextStyle(
+                    color: AppColors.accentGoldLight,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -238,46 +173,166 @@ class ProfilePage extends GetView<ProfileController> {
       ),
     );
   }
+}
 
-  /// =======================
-  /// LOGOUT BUTTON
-  /// =======================
-  Widget _buildLogoutButton() {
+// ─────────────────────────────────────────────────────────
+// INFO CARD
+// ─────────────────────────────────────────────────────────
+class _InfoCard extends StatelessWidget {
+  final ProfileController controller;
+  const _InfoCard({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
-      color: AppColors.bgGrey,
-      child: SizedBox(
-        width: double.infinity,
-        height: 58,
-        child: ElevatedButton(
-          onPressed: controller.logout,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryRed,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
+      margin: const EdgeInsets.only(top: 20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.bgWhite,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowDark,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Informasi Akun',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textDark,
             ),
           ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.logout_rounded,
-                color: AppColors.textWhite,
-              ),
-
-              SizedBox(width: 10),
-
-              Text(
-                'Keluar',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textWhite,
-                ),
-              ),
-            ],
+          const SizedBox(height: 14),
+          Obx(
+            () => _InfoRow(
+              icon: Icons.person_outline_rounded,
+              label: 'Nama',
+              value: controller.userName.value,
+            ),
           ),
+          const SizedBox(height: 12),
+          const Divider(color: AppColors.divider, height: 1),
+          const SizedBox(height: 12),
+          Obx(
+            () => _InfoRow(
+              icon: Icons.email_outlined,
+              label: 'Email',
+              value: controller.userEmail.value,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Divider(color: AppColors.divider, height: 1),
+          const SizedBox(height: 12),
+          const _InfoRow(
+            icon: Icons.shield_outlined,
+            label: 'Status',
+            value: 'Aktif',
+            valueColor: AppColors.success,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color? valueColor;
+
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: AppColors.primaryRed.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, size: 18, color: AppColors.primaryRed),
+        ),
+        const SizedBox(width: 14),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                color: AppColors.textLight,
+              ),
+            ),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: valueColor ?? AppColors.textDark,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// LOGOUT BUTTON
+// ─────────────────────────────────────────────────────────
+class _LogoutButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _LogoutButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 54,
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.errorLight,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(
+              Icons.logout_rounded,
+              color: AppColors.error,
+              size: 20,
+            ),
+            SizedBox(width: 10),
+            Text(
+              'Keluar',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: AppColors.error,
+              ),
+            ),
+          ],
         ),
       ),
     );

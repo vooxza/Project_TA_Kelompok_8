@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../controllers/cart_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/product_model.dart';
@@ -18,59 +17,64 @@ class CartBadgeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final quantity =
-          cartController.getItemQuantity(item.id ?? 0);
+      final quantity = cartController.getItemQuantity(item.id ?? 0);
 
       return Stack(
         clipBehavior: Clip.none,
         children: [
-          /// BUTTON
           GestureDetector(
             onTap: () {
               cartController.addToCart(item);
-
               Get.snackbar(
-                'Berhasil',
-                '${item.name} ditambahkan',
+                'Ditambahkan!',
+                '${item.name} masuk ke keranjang',
                 backgroundColor: AppColors.primaryRed,
                 colorText: AppColors.textWhite,
                 snackPosition: SnackPosition.TOP,
                 margin: const EdgeInsets.all(12),
                 borderRadius: 12,
+                duration: const Duration(seconds: 2),
+                icon: const Icon(
+                  Icons.check_circle_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
               );
             },
             child: Container(
-              padding: const EdgeInsets.all(5),
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
                 color: AppColors.primaryRed,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryRed.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
               child: const Icon(
-                Icons.add,
+                Icons.add_rounded,
                 color: AppColors.textWhite,
-                size: 16,
+                size: 18,
               ),
             ),
           ),
 
-          /// BADGE
+          // Quantity badge
           if (quantity > 0)
             Positioned(
               top: -6,
               right: -6,
               child: Container(
                 padding: const EdgeInsets.all(4),
-                constraints: const BoxConstraints(
-                  minWidth: 16,
-                  minHeight: 16,
-                ),
+                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
                 decoration: BoxDecoration(
-                  color: AppColors.textBlack,
+                  color: AppColors.accentGold,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: AppColors.textWhite,
-                    width: 1.5,
-                  ),
+                  border: Border.all(color: AppColors.bgWhite, width: 1.5),
                 ),
                 child: Text(
                   quantity.toString(),
@@ -78,7 +82,7 @@ class CartBadgeButton extends StatelessWidget {
                   style: const TextStyle(
                     color: AppColors.textWhite,
                     fontSize: 9,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),

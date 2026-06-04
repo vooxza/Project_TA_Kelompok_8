@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../controllers/cart_controller.dart';
 import '../../core/services/api_service.dart';
 import '../../core/services/role_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../routes/app_routes.dart';
-import '../../widgets/cart/cart_badge_button.dart';
+import '../cart/cart_badge_button.dart';
 
 class MenuCard extends StatelessWidget {
   final dynamic item;
@@ -18,66 +17,74 @@ class MenuCard extends StatelessWidget {
     required this.cartController,
   });
 
+  String _resolveImageUrl(String? image) {
+    if (image == null || image.isEmpty) return '';
+    return image.startsWith('http')
+        ? image
+        : '${ApiService.baseUrl.replaceAll('/api', '')}$image';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final imageUrl = _resolveImageUrl(item.image);
+
     return GestureDetector(
-      onTap: () => Get.toNamed(
-        AppRoutes.productDetail,
-        arguments: item,
-      ),
+      onTap: () => Get.toNamed(AppRoutes.productDetail, arguments: item),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.textWhite,
-          borderRadius: BorderRadius.circular(16),
+          color: AppColors.bgWhite,
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: AppColors.textBlack.withOpacity(0.07),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: AppColors.shadowWarm,
+              blurRadius: 16,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// IMAGE
+            // Image section
             Expanded(
               child: ClipRRect(
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
                 ),
                 child: Stack(
+                  fit: StackFit.expand,
                   children: [
-                    SizedBox(
-                      width: double.infinity,
-                      height: double.infinity,
-                      child: item.image != null && item.image!.isNotEmpty
-                          ? Image.network(
-                              item.image!.startsWith('http')
-                                  ? item.image!
-                                  : '${ApiService.baseUrl.replaceAll('/api', '')}${item.image}',
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
-                                color: AppColors.bgGrey,
-                                child: const Icon(
-                                  Icons.fastfood,
-                                  size: 40,
-                                  color: AppColors.textGrey,
-                                ),
-                              ),
-                            )
-                          : Container(
-                              color: AppColors.bgGrey,
-                              child: const Icon(
-                                Icons.fastfood,
-                                size: 40,
-                                color: AppColors.textGrey,
-                              ),
-                            ),
+                    // Product image
+                    imageUrl.isNotEmpty
+                        ? Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => _PlaceholderImage(),
+                          )
+                        : _PlaceholderImage(),
+
+                    // Gradient overlay at bottom
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: 40,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Color(0x401A0A0A),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
 
-                    /// EDIT BUTTON (ADMIN ONLY)
+                    // Admin edit button
                     if (RoleService.isAdmin)
                       Positioned(
                         top: 8,
@@ -95,14 +102,21 @@ class MenuCard extends StatelessWidget {
                             },
                           ),
                           child: Container(
-                            padding: const EdgeInsets.all(6),
+                            width: 30,
+                            height: 30,
                             decoration: BoxDecoration(
-                              color: AppColors.primaryRed,
-                              borderRadius: BorderRadius.circular(8),
+                              color: AppColors.bgWhite,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 6,
+                                ),
+                              ],
                             ),
                             child: const Icon(
-                              Icons.edit,
-                              color: AppColors.textWhite,
+                              Icons.edit_rounded,
+                              color: AppColors.primaryRed,
                               size: 14,
                             ),
                           ),
@@ -113,9 +127,9 @@ class MenuCard extends StatelessWidget {
               ),
             ),
 
-            /// INFO
+            // Info section
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -124,39 +138,33 @@ class MenuCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
                       fontSize: 13,
-                      color: AppColors.textBlack,
+                      color: AppColors.textDark,
                     ),
                   ),
-
                   const SizedBox(height: 2),
-
                   Text(
                     item.description ?? '',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 11,
-                      color: AppColors.textGreyLight,
+                      color: AppColors.textLight,
                     ),
                   ),
-
                   const SizedBox(height: 8),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Rp ${item.price.toStringAsFixed(0)}',
+                        'Rp ${_formatPrice(item.price)}',
                         style: const TextStyle(
                           color: AppColors.primaryRed,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
                           fontSize: 13,
                         ),
                       ),
-
-                      /// CART BUTTON + BADGE
                       CartBadgeButton(
                         item: item,
                         cartController: cartController,
@@ -165,6 +173,34 @@ class MenuCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatPrice(double price) {
+    final int amount = price.toInt();
+    String result = amount.toString();
+    final reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+    return result.replaceAllMapped(reg, (m) => '${m[1]}.');
+  }
+}
+
+class _PlaceholderImage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.bgSurface,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(
+              Icons.ramen_dining_rounded,
+              size: 36,
+              color: AppColors.borderMedium,
             ),
           ],
         ),

@@ -16,42 +16,36 @@ class MenuPage extends GetView<MenuController> {
   @override
   Widget build(BuildContext context) {
     final cartController = Get.find<CartController>();
-    final controller = Get.find<MenuController>();
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
-        backgroundColor: AppColors.textWhite,
+        backgroundColor: AppColors.bgCream,
         body: SafeArea(
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 8),
               const MenuHeader(),
-
               const SizedBox(height: 16),
-
-              MenuSearch(),
-
-              const SizedBox(height: 16),
-
+              const MenuSearch(),
+              const SizedBox(height: 14),
               const CategoryChips(),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
               Expanded(
                 child: Obx(() {
                   if (controller.isLoading.value) {
                     return const Center(
-                      child:
-                          CircularProgressIndicator(
-                        color:
-                            AppColors.primaryRed,
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryRed,
+                        strokeWidth: 2.5,
                       ),
                     );
                   }
 
-                  final filteredMenu =
-                      controller.filteredMenu;
+                  final filteredMenu = controller.filteredMenu;
 
                   if (filteredMenu.isEmpty) {
                     return const MenuEmpty();
@@ -59,8 +53,7 @@ class MenuPage extends GetView<MenuController> {
 
                   return MenuGrid(
                     items: filteredMenu,
-                    cartController:
-                        cartController,
+                    cartController: cartController,
                   );
                 }),
               ),
