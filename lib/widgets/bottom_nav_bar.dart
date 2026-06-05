@@ -12,35 +12,45 @@ class BottomNavBar extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+      padding: const EdgeInsets.symmetric(
+        vertical: 12,
+        horizontal: 10,
+      ),
       decoration: BoxDecoration(
-        color: AppColors.bgGreyLight,
+        color: AppColors.bgWhite,
         borderRadius: BorderRadius.circular(40),
+        border: const Border.fromBorderSide(
+          BorderSide(
+            color: AppColors.divider,
+            width: 1,
+          ),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildNavItem(
-            label: "MENU",
+            label: 'Menu',
             index: 0,
             controller: controller,
-            icon: Icons.menu_book,
+            icon: Icons.menu_book_rounded,
           ),
           _buildNavItem(
-            label: "CART",
+            label: 'Cart',
             index: 1,
             controller: controller,
-            icon: Icons.shopping_cart,
+            icon: Icons.shopping_cart_rounded,
           ),
           _buildNavItem(
-            label: "RIWAYAT",
+            label: 'History',
             index: 2,
             controller: controller,
-            icon: Icons.history,
+            icon: Icons.receipt_long_rounded,
           ),
         ],
       ),
     );
+  }
   }
 
   Widget _buildNavItem({
@@ -49,41 +59,46 @@ class BottomNavBar extends StatelessWidget {
     required BottomNavController controller,
     required IconData icon,
   }) {
-    return Obx(
-      () => GestureDetector(
+    return Obx(() {
+      final isSelected = controller.currentIndex.value == index;
+
+      return GestureDetector(
         onTap: () => controller.goTo(index),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+          padding: EdgeInsets.symmetric(
+            horizontal: isSelected ? 20 : 16,
+            vertical: 10,
+          ),
           decoration: BoxDecoration(
-            color: controller.currentIndex.value == index
-                ? AppColors.textWhite
+            color: isSelected
+                ? AppColors.primaryRed.withOpacity(0.1)
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 icon,
-                size: 20,
-                color: controller.currentIndex.value == index
-                    ? AppColors.primaryRed
-                    : Colors.grey[700],
+                size: 22,
+                color: isSelected ? AppColors.primaryRed : AppColors.textLight,
               ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: controller.currentIndex.value == index
-                      ? AppColors.primaryRed
-                      : Colors.grey[700],
+              if (isSelected) ...[
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryRed,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
-      ),
-    );
+      );
+    });
   }
-}

@@ -52,9 +52,6 @@ class MenuController extends GetxController {
       final result = await apiService.getCategories();
       categories.value = result;
 
-      if (categories.isNotEmpty) {
-        selectedCategoryId.value = categories.first.id;
-      }
     } catch (e) {
       Get.snackbar(
         'Error',

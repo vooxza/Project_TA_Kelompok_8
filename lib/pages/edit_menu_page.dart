@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../widgets/custom_input.dart';
-import '../widgets/custom_button.dart';
-import '../widgets/custom_dropdown.dart';
-import '../widgets/image_picker_box.dart';
+import '../widgets/menu/add & edit/custom_input.dart';
+import '../widgets/menu/add & edit/custom_button.dart';
+import '../widgets/menu/add & edit/custom_dropdown.dart';
+import '../widgets/menu/add & edit/image_picker_box.dart';
 import '../controllers/edit_menu_controller.dart';
 import '../core/theme/app_colors.dart';
 
@@ -86,6 +86,7 @@ class EditMenuPage extends GetView<EditMenuController> {
               label: "Harga",
               hint: "Harga menu",
               keyboardType: TextInputType.number,
+              numberOnly: true,
             ),
 
             const SizedBox(height: 30),

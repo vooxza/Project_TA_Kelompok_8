@@ -87,7 +87,7 @@ class StartingScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(30),
                         ),
                       ),
-                      onPressed: () {
+                      onPressed: () { 
                         // MENGGUNAKAN ROUTE NAME DARI APP PAGES
                         Get.toNamed(AppRoutes.login);
                       },

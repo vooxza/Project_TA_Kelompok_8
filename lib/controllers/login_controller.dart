@@ -15,7 +15,7 @@ class LoginController extends GetxController {
 
   Future<void> login() async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-      errorMessage.value = 'Email dan password wajib diisi';
+      errorMessage.value = 'Email dan password wajib diisi!';
       return;
     }
 
@@ -37,13 +37,6 @@ class LoginController extends GetxController {
       box.write('email', user['email']);
       box.write('role', user['role']);
 
-      Get.snackbar(
-        'Sukses',
-        'Login berhasil',
-        snackPosition: SnackPosition.TOP,
-      );
-
-      // ✅ Redirect berdasarkan role
       final role = user['role'] as String;
       if (role == 'admin') {
         Get.offAllNamed(AppRoutes.main);
@@ -52,7 +45,8 @@ class LoginController extends GetxController {
       }
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      errorMessage.value = 'Email dan password tidak valid!';
+      return;
     } finally {
       isLoading.value = false;
     }

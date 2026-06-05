@@ -13,10 +13,19 @@ class MenuSearch extends StatefulWidget {
 class _MenuSearchState extends State<MenuSearch> {
   final MenuController controller = Get.find<MenuController>();
   final FocusNode _focusNode = FocusNode();
+  bool _isFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      setState(() => _isFocused = _focusNode.hasFocus);
+    });
+  }
 
   @override
   void dispose() {
-    _focusNode.unfocus(); // ← unfocus saat widget di-dispose (navigasi keluar)
+    _focusNode.unfocus();
     _focusNode.dispose();
     super.dispose();
   }
@@ -25,42 +34,69 @@ class _MenuSearchState extends State<MenuSearch> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        height: 52,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: 50,
         decoration: BoxDecoration(
-          color: AppColors.bgGrey,
-          borderRadius: BorderRadius.circular(18),
+          color: AppColors.bgSurfaceLight,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: _isFocused ? AppColors.primaryRed : AppColors.borderLight,
+            width: 1.5,
+          ),
+          boxShadow: _isFocused
+              ? [
+                  BoxShadow(
+                    color: AppColors.primaryRed.withOpacity(0.1),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
         ),
         child: TextField(
           controller: controller.searchController,
-          focusNode: _focusNode, // ← pakai focusNode ini
-
-          onChanged: (value) {
-            controller.searchQuery.value = value;
-          },
-
-          onTapOutside: (_) {
-            _focusNode.unfocus(); // ← unfocus pakai focusNode sendiri
-          },
-
-          cursorColor: AppColors.primaryRed,
-
+          focusNode: _focusNode,
+          onChanged: (value) => controller.searchQuery.value = value,
+          onTapOutside: (_) => _focusNode.unfocus(),
           style: const TextStyle(
             fontSize: 14,
-            color: AppColors.textBlack,
+            color: AppColors.textDark,
             fontWeight: FontWeight.w500,
           ),
-
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(borderSide: BorderSide.none),
-            enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
-            focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
-            prefixIcon: Icon(Icons.search_rounded, color: AppColors.textGrey),
-            hintText: 'Cari menu...',
-            hintStyle: TextStyle(
-              color: AppColors.textGreyLight,
+          cursorColor: AppColors.primaryRed,
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            prefixIcon: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              child: Icon(
+                Icons.search_rounded,
+                color: _isFocused ? AppColors.primaryRed : AppColors.textLight,
+                size: 20,
+              ),
+            ),
+            suffixIcon: Obx(() {
+              if (controller.searchQuery.value.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return GestureDetector(
+                onTap: () {
+                  controller.searchController.clear();
+                  controller.searchQuery.value = '';
+                },
+                child: const Icon(
+                  Icons.close_rounded,
+                  color: AppColors.textLight,
+                  size: 18,
+                ),
+              );
+            }),
+            hintText: 'Cari menu favorit kamu...',
+            hintStyle: const TextStyle(
+              color: AppColors.textLight,
               fontSize: 14,
             ),
+            contentPadding: const EdgeInsets.symmetric(vertical: 14),
           ),
         ),
       ),
