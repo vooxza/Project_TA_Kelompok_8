@@ -6,14 +6,34 @@ import '../../core/theme/app_colors.dart';
 import '../../routes/app_routes.dart';
 import 'table_dropdown.dart';
 
-class CartSummary extends StatelessWidget {
+class CartSummary extends StatefulWidget {
   final CartController controller;
   const CartSummary({required this.controller});
 
   @override
-  Widget build(BuildContext context) {
-    final mejaList = ['Meja 1', 'Meja 2', 'Meja 3', 'Meja 4', 'Meja 5'];
+  State<CartSummary> createState() => _CartSummaryState();
+}
 
+class _CartSummaryState extends State<CartSummary> {
+  late final TextEditingController _nameController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inisialisasi sekali, pakai nilai yang sudah ada jika ada
+    _nameController = TextEditingController(
+      text: widget.controller.selectedTable.value ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
       decoration: BoxDecoration(
@@ -32,7 +52,7 @@ class CartSummary extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Table selector
+          // Atas Nama input
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
@@ -40,58 +60,42 @@ class CartSummary extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.borderLight, width: 1.5),
             ),
-            child: Obx(
-              () => DropdownButton<String>(
-                value: controller.selectedTable.value,
-                isExpanded: true,
-                hint: Row(
-                  children: const [
-                    Icon(
-                      Icons.table_restaurant_rounded,
-                      size: 18,
-                      color: AppColors.textLight,
-                    ),
-                    SizedBox(width: 10),
-                    Text(
-                      'Pilih Nomor Meja',
-                      style: TextStyle(
-                        color: AppColors.textLight,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-                underline: const SizedBox.shrink(),
-                borderRadius: BorderRadius.circular(16),
-                icon: const Icon(
-                  Icons.keyboard_arrow_down_rounded,
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.person_outline_rounded,
+                  size: 18,
                   color: AppColors.textLight,
                 ),
-                items: mejaList.map((table) {
-                  return DropdownMenuItem(
-                    value: table,
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.table_restaurant_rounded,
-                          size: 18,
-                          color: AppColors.primaryRed,
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          table,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textDark,
-                          ),
-                        ),
-                      ],
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: _nameController,
+                    onChanged: (value) =>
+                        widget.controller.selectedTable.value =
+                            value.trim().isEmpty ? null : value.trim(),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textDark,
                     ),
-                  );
-                }).toList(),
-                onChanged: (value) => controller.selectedTable.value = value,
-              ),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 14),
+                      hintText: 'Atas Nama',
+                      hintStyle: TextStyle(
+                        color: AppColors.textLight,
+                        fontSize: 14,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -111,7 +115,7 @@ class CartSummary extends StatelessWidget {
               ),
               Obx(
                 () => Text(
-                  controller.formatRupiah(controller.totalPrice),
+                  widget.controller.formatRupiah(widget.controller.totalPrice),
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
@@ -131,10 +135,11 @@ class CartSummary extends StatelessWidget {
             height: 54,
             child: ElevatedButton(
               onPressed: () {
-                if (controller.selectedTable.value == null) {
+                if (widget.controller.selectedTable.value == null ||
+                    widget.controller.selectedTable.value!.trim().isEmpty) {
                   Get.snackbar(
-                    'Pilih Meja',
-                    'Silakan pilih nomor meja terlebih dahulu',
+                    'Atas Nama Kosong',
+                    'Silakan isi nama terlebih dahulu',
                     backgroundColor: AppColors.warning,
                     colorText: AppColors.textWhite,
                     snackPosition: SnackPosition.TOP,

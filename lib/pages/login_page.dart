@@ -17,7 +17,7 @@ class LoginPage extends GetView<LoginController> {
             top: 0,
             left: 0,
             right: 0,
-            height: MediaQuery.of(context).size.height * 0.42,
+            height: MediaQuery.of(context).size.height * 0.66,
             child: Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -109,7 +109,7 @@ class LoginPage extends GetView<LoginController> {
               child: Container(
                 width: double.infinity,
                 margin: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.height * 0.34,
+                  top: MediaQuery.of(context).size.height * 0.66,
                 ),
                 padding: EdgeInsets.fromLTRB(
                   28,

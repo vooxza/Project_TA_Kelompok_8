@@ -8,6 +8,7 @@ class HistoryController extends GetxController {
   var isLoading = true.obs;
   var orderList = [].obs;
   var selectedTable = RxnString();
+  var selectedDate = Rxn<DateTime>(); // ← BARU
   var totalRevenue = 0.0.obs;
   final box = GetStorage();
 
@@ -25,7 +26,7 @@ class HistoryController extends GetxController {
       String? token = box.read('token');
 
       final response = await http.get(
-        Uri.parse('${ApiService.baseUrl}/order'), // ✅ pakai baseUrl terpusat
+        Uri.parse('${ApiService.baseUrl}/order'),
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
@@ -35,7 +36,6 @@ class HistoryController extends GetxController {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-
         if (data['data'] != null && data['data'] is List) {
           orderList.value = data['data'];
           _calculateTotalRevenue();
@@ -54,9 +54,9 @@ class HistoryController extends GetxController {
     }
   }
 
-  // ✅ method refresh untuk dipanggil setelah checkout
   Future<void> refresh() async {
     selectedTable.value = null;
+    selectedDate.value = null; // ← reset date filter juga
     await fetchOrders();
   }
 
