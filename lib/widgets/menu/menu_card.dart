@@ -55,7 +55,6 @@ class MenuCard extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Product image
                     imageUrl.isNotEmpty
                         ? Image.network(
                             imageUrl,
@@ -64,7 +63,6 @@ class MenuCard extends StatelessWidget {
                           )
                         : _PlaceholderImage(),
 
-                    // Gradient overlay at bottom
                     Positioned(
                       bottom: 0,
                       left: 0,
@@ -84,7 +82,6 @@ class MenuCard extends StatelessWidget {
                       ),
                     ),
 
-                    // Admin edit button
                     if (RoleService.isAdmin)
                       Positioned(
                         top: 8,
@@ -139,7 +136,7 @@ class MenuCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
-                      fontSize: 13,
+                      fontSize: 15,       // sebelumnya 13
                       color: AppColors.textDark,
                     ),
                   ),
@@ -149,7 +146,7 @@ class MenuCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 11,
+                      fontSize: 12,       // sebelumnya 11
                       color: AppColors.textLight,
                     ),
                   ),
@@ -162,7 +159,7 @@ class MenuCard extends StatelessWidget {
                         style: const TextStyle(
                           color: AppColors.primaryRed,
                           fontWeight: FontWeight.w800,
-                          fontSize: 13,
+                          fontSize: 15,   // sebelumnya 13
                         ),
                       ),
                       CartBadgeButton(

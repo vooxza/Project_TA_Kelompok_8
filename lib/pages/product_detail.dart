@@ -138,7 +138,7 @@ class ProductDetailPage extends StatelessWidget {
                   const Text(
                     'Deskripsi',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textDark,
                     ),
@@ -149,7 +149,7 @@ class ProductDetailPage extends StatelessWidget {
                         ? item.description!
                         : 'Tidak ada deskripsi tersedia.',
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: 16,
                       color: AppColors.textLight,
                       height: 1.6,
                     ),
