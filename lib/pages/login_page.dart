@@ -37,7 +37,7 @@ class LoginPage extends GetView<LoginController> {
                       height: 180,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.05),
+                        color: Colors.white.withValues(alpha: 0.05),
                       ),
                     ),
                   ),
@@ -49,7 +49,7 @@ class LoginPage extends GetView<LoginController> {
                       height: 200,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.accentGold.withOpacity(0.08),
+                        color: AppColors.accentGold.withValues(alpha: 0.08),
                       ),
                     ),
                   ),
@@ -64,7 +64,7 @@ class LoginPage extends GetView<LoginController> {
                             width: 52,
                             height: 52,
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: const Icon(
@@ -186,7 +186,7 @@ class LoginPage extends GetView<LoginController> {
                           color: AppColors.errorLight,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppColors.error.withOpacity(0.3),
+                            color: AppColors.error.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
@@ -226,7 +226,7 @@ class LoginPage extends GetView<LoginController> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryRed,
                             disabledBackgroundColor:
-                                AppColors.primaryRed.withOpacity(0.6),
+                                AppColors.primaryRed.withValues(alpha: 0.6),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18),
