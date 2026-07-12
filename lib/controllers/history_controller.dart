@@ -8,7 +8,8 @@ class HistoryController extends GetxController {
   var isLoading = true.obs;
   var orderList = [].obs;
   var selectedTable = RxnString();
-  var selectedDate = Rxn<DateTime>(); // ← BARU
+  var selectedDate = Rxn<DateTime>();
+  var selectedMonthFilter = Rxn<DateTime>(); // filter per bulan
   var totalRevenue = 0.0.obs;
   final box = GetStorage();
 
@@ -56,7 +57,8 @@ class HistoryController extends GetxController {
 
   Future<void> refresh() async {
     selectedTable.value = null;
-    selectedDate.value = null; // ← reset date filter juga
+    selectedDate.value = null;
+    selectedMonthFilter.value = null;
     await fetchOrders();
   }
 
