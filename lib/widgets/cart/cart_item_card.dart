@@ -12,6 +12,7 @@ class CartItemCard extends StatelessWidget {
 
   final VoidCallback onAdd;
   final VoidCallback onRemove;
+  final VoidCallback? onDelete;
 
   const CartItemCard({
     super.key,
@@ -22,6 +23,7 @@ class CartItemCard extends StatelessWidget {
     this.image,
     required this.onAdd,
     required this.onRemove,
+    this.onDelete,
   });
 
   String? get _resolvedImage {
@@ -135,48 +137,58 @@ class CartItemCard extends StatelessWidget {
                       ),
                     ),
 
-                    Container(
-                      decoration:
-                          BoxDecoration(
-                        color: AppColors
-                            .bgSurface,
-                        borderRadius:
-                            BorderRadius
-                                .circular(
-                          12,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize:
-                            MainAxisSize
-                                .min,
-                        children: [
-                          _QtyButton(
-                            icon: Icons
-                                .remove_rounded,
-                            onTap:
-                                onRemove,
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(
-                              horizontal:
-                                  10,
-                            ),
-                            child: Text(
-                              '$quantity',
-                            ),
-                          ),
-                          _QtyButton(
-                            icon: Icons
-                                .add_rounded,
-                            isAdd:
-                                true,
-                            onTap:
-                                onAdd,
-                          ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (onDelete != null) ...[
+                          _DeleteButton(onTap: onDelete!),
+                          const SizedBox(width: 8),
                         ],
-                      ),
+                        Container(
+                          decoration:
+                              BoxDecoration(
+                            color: AppColors
+                                .bgSurface,
+                            borderRadius:
+                                BorderRadius
+                                    .circular(
+                              12,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize:
+                                MainAxisSize
+                                    .min,
+                            children: [
+                              _QtyButton(
+                                icon: Icons
+                                    .remove_rounded,
+                                onTap: quantity <= 1
+                                    ? (onDelete ?? onRemove)
+                                    : onRemove,
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(
+                                  horizontal:
+                                      10,
+                                ),
+                                child: Text(
+                                  '$quantity',
+                                ),
+                              ),
+                              _QtyButton(
+                                icon: Icons
+                                    .add_rounded,
+                                isAdd:
+                                    true,
+                                onTap:
+                                    onAdd,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -209,6 +221,32 @@ class CartItemCard extends StatelessWidget {
     return result.replaceAllMapped(
       reg,
       (m) => '${m[1]}.',
+    );
+  }
+}
+
+class _DeleteButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _DeleteButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: AppColors.errorLight,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Icon(
+          Icons.delete_outline_rounded,
+          size: 16,
+          color: AppColors.error,
+        ),
+      ),
     );
   }
 }

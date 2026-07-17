@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../core/responsive/responsive_layout.dart';
 import '../core/theme/app_colors.dart';
 import '../widgets/menu/add & edit/custom_input.dart';
 import '../widgets/menu/add & edit/custom_dropdown.dart';
 import '../widgets/menu/add & edit/custom_button.dart';
 import '../widgets/menu/add & edit/image_picker_box.dart';
 import '../controllers/add_menu_controller.dart';
+import 'wide/add_menu_page_wide.dart';
 
 class AddMenuPage extends GetView<AddMenuController> {
   const AddMenuPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const ResponsiveLayout(
+      mobile: _AddMenuPageMobile(),
+      wide: AddMenuPageWide(),
+    );
+  }
+}
+
+class _AddMenuPageMobile extends GetView<AddMenuController> {
+  const _AddMenuPageMobile();
 
   @override
   Widget build(BuildContext context) {

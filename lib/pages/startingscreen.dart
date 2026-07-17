@@ -1,9 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../core/responsive/responsive_layout.dart';
 import '../routes/app_routes.dart';
+import 'wide/startingscreen_wide.dart';
 
 class StartingScreen extends StatelessWidget {
   const StartingScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const ResponsiveLayout(
+      mobile: _StartingScreenMobile(),
+      wide: StartingScreenWide(),
+    );
+  }
+}
+
+class _StartingScreenMobile extends StatelessWidget {
+  const _StartingScreenMobile();
 
   @override
   Widget build(BuildContext context) {

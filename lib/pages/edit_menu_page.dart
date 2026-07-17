@@ -5,10 +5,24 @@ import '../widgets/menu/add & edit/custom_button.dart';
 import '../widgets/menu/add & edit/custom_dropdown.dart';
 import '../widgets/menu/add & edit/image_picker_box.dart';
 import '../controllers/edit_menu_controller.dart';
+import '../core/responsive/responsive_layout.dart';
 import '../core/theme/app_colors.dart';
+import 'wide/edit_menu_page_wide.dart';
 
 class EditMenuPage extends GetView<EditMenuController> {
   const EditMenuPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const ResponsiveLayout(
+      mobile: _EditMenuPageMobile(),
+      wide: EditMenuPageWide(),
+    );
+  }
+}
+
+class _EditMenuPageMobile extends GetView<EditMenuController> {
+  const _EditMenuPageMobile();
 
   @override
   Widget build(BuildContext context) {

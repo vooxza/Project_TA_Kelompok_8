@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/login_controller.dart';
+import '../core/responsive/responsive_layout.dart';
 import '../core/theme/app_colors.dart';
+import 'wide/login_page_wide.dart';
 
 class LoginPage extends GetView<LoginController> {
   const LoginPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const ResponsiveLayout(
+      mobile: _LoginPageMobile(),
+      wide: LoginPageWide(),
+    );
+  }
+}
+
+class _LoginPageMobile extends GetView<LoginController> {
+  const _LoginPageMobile();
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +163,7 @@ class LoginPage extends GetView<LoginController> {
                     const SizedBox(height: 28),
 
                     // Email field
-                    _LoginField(
+                    LoginField(
                       controller: controller.emailController,
                       label: 'Email',
                       hint: 'Masukkan email',
@@ -160,7 +174,7 @@ class LoginPage extends GetView<LoginController> {
                     const SizedBox(height: 16),
 
                     // Password field
-                    _LoginField(
+                    LoginField(
                       controller: controller.passwordController,
                       label: 'Password',
                       hint: 'Masukkan password',
@@ -264,7 +278,7 @@ class LoginPage extends GetView<LoginController> {
   }
 }
 
-class _LoginField extends StatefulWidget {
+class LoginField extends StatefulWidget {
   final TextEditingController controller;
   final String label;
   final String hint;
@@ -272,7 +286,7 @@ class _LoginField extends StatefulWidget {
   final bool obscureText;
   final TextInputType keyboardType;
 
-  const _LoginField({
+  const LoginField({
     required this.controller,
     required this.label,
     required this.hint,
@@ -282,10 +296,10 @@ class _LoginField extends StatefulWidget {
   });
 
   @override
-  State<_LoginField> createState() => _LoginFieldState();
+  State<LoginField> createState() => _LoginFieldState();
 }
 
-class _LoginFieldState extends State<_LoginField> {
+class _LoginFieldState extends State<LoginField> {
   late bool _obscure;
 
   @override

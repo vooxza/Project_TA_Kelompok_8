@@ -3,15 +3,29 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/menu_controller.dart';
+import '../core/responsive/responsive_layout.dart';
 import '../core/theme/app_colors.dart';
 import '../widgets/menu/category_chips.dart';
 import '../widgets/menu/menu_empty.dart';
 import '../widgets/menu/menu_grid.dart';
 import '../widgets/menu/menu_header.dart';
 import '../widgets/menu/menu_search.dart';
+import 'wide/menu_page_wide.dart';
 
 class MenuPage extends GetView<MenuController> {
   const MenuPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const ResponsiveLayout(
+      mobile: _MenuPageMobile(),
+      wide: MenuPageWide(),
+    );
+  }
+}
+
+class _MenuPageMobile extends GetView<MenuController> {
+  const _MenuPageMobile();
 
   @override
   Widget build(BuildContext context) {

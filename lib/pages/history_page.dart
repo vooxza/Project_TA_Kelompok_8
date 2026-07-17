@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../core/responsive/responsive_layout.dart';
 import '../core/theme/app_colors.dart';
 import '../controllers/history_controller.dart';
 import '../widgets/history/filter_indicator.dart';
 import '../widgets/history/filter_sheet.dart';
 import '../widgets/history/paginated_order_list.dart';
 import '../widgets/history/revenue_card.dart';
+import 'wide/history_page_wide.dart';
 
 class HistoryPage extends GetView<HistoryController> {
   const HistoryPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const ResponsiveLayout(
+      mobile: _HistoryPageMobile(),
+      wide: HistoryPageWide(),
+    );
+  }
+}
+
+class _HistoryPageMobile extends GetView<HistoryController> {
+  const _HistoryPageMobile();
 
   @override
   Widget build(BuildContext context) {

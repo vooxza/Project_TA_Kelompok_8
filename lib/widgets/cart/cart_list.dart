@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/cart_controller.dart';
+import '../dialog_button.dart';
 import 'cart_item_card.dart';
 
 class CartList extends StatelessWidget {
@@ -10,6 +11,19 @@ class CartList extends StatelessWidget {
     super.key,
     required this.controller,
   });
+
+  void _confirmDelete(int productId, String name) {
+    Get.dialog(
+      CustomDialog(
+        title: 'Hapus Item?',
+        message: 'Yakin ingin menghapus "$name" dari keranjang?',
+        textCancel: 'Batal',
+        textConfirm: 'Ya, Hapus',
+        onCancel: () => Get.back(),
+        onConfirm: () => controller.removeFromCart(productId),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +55,10 @@ class CartList extends StatelessWidget {
             onRemove: () =>
                 controller.decrementQuantity(
               item.product.id ?? 0,
+            ),
+            onDelete: () => _confirmDelete(
+              item.product.id ?? 0,
+              item.product.name,
             ),
           ),
         );

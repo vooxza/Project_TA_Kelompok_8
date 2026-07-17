@@ -1,15 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../core/responsive/responsive_layout.dart';
 import '../core/theme/app_colors.dart';
+import 'wide/splashscreen_wide.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  Widget build(BuildContext context) {
+    return const ResponsiveLayout(
+      mobile: _SplashScreenMobile(),
+      wide: SplashScreenWide(),
+    );
+  }
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenMobile extends StatefulWidget {
+  const _SplashScreenMobile();
+
+  @override
+  State<_SplashScreenMobile> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<_SplashScreenMobile>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnim;

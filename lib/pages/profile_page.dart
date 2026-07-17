@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/profile_controller.dart';
+import '../core/responsive/responsive_layout.dart';
 import '../core/theme/app_colors.dart';
+import 'wide/profile_page_wide.dart';
 
 class ProfilePage extends GetView<ProfileController> {
   const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const ResponsiveLayout(
+      mobile: _ProfilePageMobile(),
+      wide: ProfilePageWide(),
+    );
+  }
+}
+
+class _ProfilePageMobile extends GetView<ProfileController> {
+  const _ProfilePageMobile();
 
   @override
   Widget build(BuildContext context) {
