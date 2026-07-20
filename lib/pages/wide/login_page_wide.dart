@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/login_controller.dart';
 import '../../core/theme/app_colors.dart';
-import '../login_page.dart' show LoginField;
+import '../../widgets/login_field.dart';
 
 /// Versi widescreen dari LoginPage. Logic & controller sama persis dengan
 /// versi mobile — hanya direflow jadi 2 kolom: kiri panel preview (senada

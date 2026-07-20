@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/bottomnav_controller.dart';
+import '../controllers/cart_controller.dart';
+import '../core/services/role_service.dart';
 import '../core/theme/app_colors.dart';
 import '../routes/app_routes.dart';
 
@@ -14,6 +16,7 @@ class WideNavDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<BottomNavController>();
+    final cartController = Get.find<CartController>();
 
     return Container(
       width: 220,
@@ -54,7 +57,36 @@ class WideNavDrawer extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            // Badge role, biar jelas lagi login sebagai siapa (berguna
+            // banget kalau ganti akun admin <-> kasir di device yang sama).
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: RoleService.isAdmin
+                        ? AppColors.primaryRed.withOpacity(0.1)
+                        : AppColors.accentGold.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    RoleService.isAdmin ? 'ADMIN' : 'KASIR',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                      color: RoleService.isAdmin
+                          ? AppColors.primaryRed
+                          : const Color(0xFF8A6D1D),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
@@ -66,11 +98,14 @@ class WideNavDrawer extends StatelessWidget {
                     controller: controller,
                   ),
                   const SizedBox(height: 6),
-                  _NavTile(
-                    label: 'Keranjang',
-                    icon: Icons.shopping_cart_rounded,
-                    index: 1,
-                    controller: controller,
+                  Obx(
+                    () => _NavTile(
+                      label: 'Keranjang',
+                      icon: Icons.shopping_cart_rounded,
+                      index: 1,
+                      controller: controller,
+                      badgeCount: cartController.cartItems.length,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   _NavTile(
@@ -106,6 +141,7 @@ class _NavTile extends StatelessWidget {
   final int index;
   final BottomNavController controller;
   final VoidCallback? onTap;
+  final int badgeCount;
 
   const _NavTile({
     required this.label,
@@ -113,6 +149,7 @@ class _NavTile extends StatelessWidget {
     required this.index,
     required this.controller,
     this.onTap,
+    this.badgeCount = 0,
   });
 
   @override
@@ -148,16 +185,38 @@ class _NavTile extends StatelessWidget {
                       : AppColors.textLight,
                 ),
                 const SizedBox(width: 14),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected
-                        ? AppColors.primaryRed
-                        : AppColors.textMedium,
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected
+                          ? AppColors.primaryRed
+                          : AppColors.textMedium,
+                    ),
                   ),
                 ),
+                if (badgeCount > 0)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primaryRed
+                          : AppColors.primaryRed.withOpacity(0.85),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '$badgeCount',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

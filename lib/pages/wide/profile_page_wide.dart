@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/profile_controller.dart';
 import '../../core/theme/app_colors.dart';
+import '../../widgets/profile/info_row_wide.dart';
 
 /// Versi widescreen dari ProfilePage. Fitur & data sama persis dengan versi
 /// mobile (nama, email, status akun, tombol keluar) — didesain ulang jadi
@@ -158,7 +159,7 @@ class ProfilePageWide extends GetView<ProfileController> {
                             ),
                             const SizedBox(height: 20),
                             Obx(
-                              () => _InfoRow(
+                              () => InfoRowWide(
                                 icon: Icons.person_outline_rounded,
                                 label: 'Nama',
                                 value: controller.userName.value,
@@ -168,7 +169,7 @@ class ProfilePageWide extends GetView<ProfileController> {
                             const Divider(color: AppColors.divider, height: 1),
                             const SizedBox(height: 16),
                             Obx(
-                              () => _InfoRow(
+                              () => InfoRowWide(
                                 icon: Icons.email_outlined,
                                 label: 'Email',
                                 value: controller.userEmail.value,
@@ -177,7 +178,7 @@ class ProfilePageWide extends GetView<ProfileController> {
                             const SizedBox(height: 16),
                             const Divider(color: AppColors.divider, height: 1),
                             const SizedBox(height: 16),
-                            const _InfoRow(
+                            const InfoRowWide(
                               icon: Icons.shield_outlined,
                               label: 'Status',
                               value: 'Aktif',
@@ -225,54 +226,6 @@ class ProfilePageWide extends GetView<ProfileController> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color? valueColor;
-
-  const _InfoRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-    this.valueColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: AppColors.primaryRed.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, size: 19, color: AppColors.primaryRed),
-        ),
-        const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label,
-                style:
-                    const TextStyle(fontSize: 12, color: AppColors.textLight)),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: valueColor ?? AppColors.textDark,
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }

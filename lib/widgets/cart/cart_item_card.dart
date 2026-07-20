@@ -164,7 +164,7 @@ class CartItemCard extends StatelessWidget {
                                 icon: Icons
                                     .remove_rounded,
                                 onTap: quantity <= 1
-                                    ? (onDelete ?? onRemove)
+                                    ? null
                                     : onRemove,
                               ),
                               Padding(
@@ -253,7 +253,7 @@ class _DeleteButton extends StatelessWidget {
 
 class _QtyButton extends StatelessWidget {
   final IconData icon;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool isAdd;
 
   const _QtyButton({
@@ -264,24 +264,29 @@ class _QtyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDisabled = onTap == null;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: isAdd
-              ? AppColors.primaryRed
-              : AppColors.bgSurfaceLight,
+          color: isDisabled
+              ? AppColors.bgSurfaceLight.withOpacity(0.5)
+              : isAdd
+                  ? AppColors.primaryRed
+                  : AppColors.bgSurfaceLight,
           borderRadius:
               BorderRadius.circular(10),
         ),
         child: Icon(
           icon,
           size: 16,
-          color: isAdd
-              ? AppColors.textWhite
-              : AppColors.textMedium,
+          color: isDisabled
+              ? AppColors.textMedium.withOpacity(0.35)
+              : isAdd
+                  ? AppColors.textWhite
+                  : AppColors.textMedium,
         ),
       ),
     );

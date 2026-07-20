@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../controllers/cart_controller.dart';
+import '../../controllers/cart_controller.dart';
 import 'menu_card.dart';
 
 class MenuGrid extends StatelessWidget {

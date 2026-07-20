@@ -19,6 +19,14 @@ class ResponsiveLayout extends StatelessWidget {
 
   /// Lebar minimum (dp) supaya dianggap "wide" (tablet/desktop).
   /// Di bawah nilai ini akan menampilkan versi mobile.
+  ///
+  /// Catatan: MainPage menambahkan sidebar selebar 220dp di sisi kiri
+  /// untuk versi wide. Karena tiap halaman (Menu/Cart/History/dst)
+  /// menentukan mobile-vs-wide sendiri berdasarkan lebar yang TERSISA
+  /// setelah dikurangi sidebar, breakpoint ini sengaja dibuat cukup
+  /// tinggi (1000dp) supaya rentang lebar layar yang bisa bikin sidebar
+  /// muncul duluan sebelum kontennya ikut berubah jadi wide (dan
+  /// sebaliknya) makin sempit/jarang kejadian.
   final double breakpoint;
 
   const ResponsiveLayout({

@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../routes/app_routes.dart';
 import '../../widgets/menu/menu_empty.dart';
 import '../../widgets/menu/menu_grid.dart';
+import '../../widgets/menu/search_box_wide.dart';
 
 /// Versi widescreen dari MenuPage (ditampilkan sebagai "Home" pada desain
 /// Figma). Struktur & data sama persis dengan versi mobile, hanya reflow
@@ -81,22 +82,38 @@ class MenuPageWide extends GetView<MenuController> {
                       // Search box
                       Expanded(
                         flex: 2,
-                        child: _SearchBox(controller: controller),
+                        child: SearchBoxWide(controller: controller),
                       ),
                       const SizedBox(width: 16),
                       if (RoleService.isAdmin)
-                        _HeaderButton(
-                          icon: Icons.add_rounded,
-                          color: AppColors.primaryRed,
+                        GestureDetector(
                           onTap: () => Get.toNamed(AppRoutes.addMenu),
+                          child: Container(
+                            height: 48,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryRed,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.add_rounded,
+                                    size: 20, color: AppColors.textWhite),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Tambah Menu',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textWhite,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      if (RoleService.isAdmin) const SizedBox(width: 10),
-                      _HeaderButton(
-                        icon: Icons.person_outline_rounded,
-                        color: AppColors.bgSurface,
-                        iconColor: AppColors.textDark,
-                        onTap: () => Get.toNamed(AppRoutes.profile),
-                      ),
                     ],
                   ),
                 ),
@@ -176,91 +193,19 @@ class MenuPageWide extends GetView<MenuController> {
                       return const MenuEmpty();
                     }
 
-                    return LayoutBuilder(builder: (context, constraints) {
-                      // Sesuaikan jumlah kolom dengan lebar konten
-                      final cols = constraints.maxWidth >= 1000
-                          ? 4
-                          : constraints.maxWidth >= 750
-                              ? 3
-                              : 2;
-                      return MenuGrid(
-                        items: filteredMenu,
-                        cartController: cartController,
-                        crossAxisCount: cols,
-                        childAspectRatio: 0.82,
-                        padding: const EdgeInsets.fromLTRB(28, 4, 28, 28),
-                      );
-                    });
+                    return MenuGrid(
+                      items: filteredMenu,
+                      cartController: cartController,
+                      crossAxisCount: 4,
+                      childAspectRatio: 0.72,
+                      padding: const EdgeInsets.fromLTRB(28, 4, 28, 28),
+                    );
                   }),
                 ),
               ],
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SearchBox extends StatelessWidget {
-  final MenuController controller;
-  const _SearchBox({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: AppColors.bgSurfaceLight,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderLight, width: 1.5),
-      ),
-      child: TextField(
-        controller: controller.searchController,
-        onChanged: (value) => controller.searchQuery.value = value,
-        style: const TextStyle(fontSize: 14, color: AppColors.textDark),
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          disabledBorder: InputBorder.none,
-          filled: false,
-          prefixIcon: Icon(Icons.search_rounded,
-              color: AppColors.textLight, size: 20),
-          hintText: 'Cari menu favorit kamu...',
-          hintStyle: TextStyle(color: AppColors.textLight, fontSize: 14),
-          contentPadding: EdgeInsets.symmetric(vertical: 13),
-        ),
-      ),
-    );
-  }
-}
-
-class _HeaderButton extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final Color? iconColor;
-  final VoidCallback onTap;
-
-  const _HeaderButton({
-    required this.icon,
-    required this.color,
-    this.iconColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Icon(icon, size: 22, color: iconColor ?? AppColors.textWhite),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/history_controller.dart';
+import '../../core/services/pdf_report_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../widgets/history/filter_indicator.dart';
 import '../../widgets/history/filter_sheet.dart';
@@ -143,6 +144,34 @@ class HistoryPageWide extends GetView<HistoryController> {
     );
   }
 
+  /// Ekspor daftar pesanan yang SEDANG TAMPIL (sudah kena filter
+  /// tanggal/bulan kalau ada) jadi PDF laporan penjualan.
+  Future<void> _exportPdf() async {
+    final orders = _getFilteredOrders();
+
+    String? periodLabel;
+    if (controller.selectedDate.value != null) {
+      periodLabel = _formatDateLabel(controller.selectedDate.value!);
+    } else if (controller.selectedMonthFilter.value != null) {
+      periodLabel = _formatMonthLabel(controller.selectedMonthFilter.value!);
+    }
+
+    Get.dialog(
+      const Center(
+        child: CircularProgressIndicator(color: AppColors.primaryRed),
+      ),
+      barrierDismissible: false,
+    );
+    try {
+      await PdfReportService.previewSalesReport(
+        orders: orders,
+        periodLabel: periodLabel,
+      );
+    } finally {
+      if (Get.isDialogOpen ?? false) Get.back();
+    }
+  }
+
   Widget _buildHeader() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,6 +184,23 @@ class HistoryPageWide extends GetView<HistoryController> {
               fontWeight: FontWeight.w800,
               color: AppColors.textDark,
               letterSpacing: -0.5,
+            ),
+          ),
+        ),
+        GestureDetector(
+          onTap: () => _exportPdf(),
+          child: Container(
+            width: 48,
+            height: 48,
+            margin: const EdgeInsets.only(right: 10),
+            decoration: BoxDecoration(
+              color: AppColors.bgSurface,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(
+              Icons.picture_as_pdf_rounded,
+              size: 22,
+              color: AppColors.textMedium,
             ),
           ),
         ),

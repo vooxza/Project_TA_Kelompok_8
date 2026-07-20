@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide MenuController;
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../routes/app_routes.dart';
 import '../core/theme/app_colors.dart';
 import 'bottomnav_controller.dart';
 import 'cart_controller.dart';
+import 'menu_controller.dart';
+import 'history_controller.dart';
 
 class ProfileController extends GetxController {
   final box = GetStorage();
@@ -37,6 +39,21 @@ class ProfileController extends GetxController {
     }
     if (Get.isRegistered<CartController>()) {
       Get.find<CartController>().clearCart();
+    }
+    // Reset pencarian & filter kategori Menu supaya user berikutnya
+    // (misal admin -> kasir) tidak mewarisi pencarian/filter sesi lama.
+    if (Get.isRegistered<MenuController>()) {
+      final menuController = Get.find<MenuController>();
+      menuController.searchQuery.value = '';
+      menuController.searchController.clear();
+      menuController.selectedCategoryId.value = null;
+    }
+    // Reset filter tanggal/bulan di Riwayat Pesanan dengan alasan yang sama.
+    if (Get.isRegistered<HistoryController>()) {
+      final historyController = Get.find<HistoryController>();
+      historyController.selectedTable.value = null;
+      historyController.selectedDate.value = null;
+      historyController.selectedMonthFilter.value = null;
     }
 
     Get.snackbar(
