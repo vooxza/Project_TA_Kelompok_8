@@ -89,7 +89,7 @@ class PaymentPageMobile extends GetView<CartController> {
         message: 'Apakah yakin ingin membatalkan pesanan ini?',
         textCancel: 'Tidak',
         textConfirm: 'Ya, Batalkan',
-        onCancel: () => Get.back(),
+        onCancel: () {},
         onConfirm: () {
           Get.back();
           controller.clearCart();

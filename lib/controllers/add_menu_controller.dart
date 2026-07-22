@@ -66,20 +66,9 @@ class AddMenuController extends GetxController {
 
       if (pickedFile != null) {
         selectedImage.value = pickedFile.path;
-
-        Get.snackbar(
-          'Success',
-          'Image selected',
-          snackPosition: SnackPosition.TOP,
-        );
       }
     } catch (e) {
       debugPrint('Error picking image: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to select image',
-        snackPosition: SnackPosition.TOP,
-      );
     }
   }
 
@@ -87,7 +76,7 @@ class AddMenuController extends GetxController {
     if (nameController.text.isEmpty ||
         priceController.text.isEmpty ||
         selectedCategoryId.value == null) {
-      Get.snackbar('Error', 'Nama, harga, dan kategori wajib diisi');
+      // Get.snackbar('Error', 'Nama, harga, dan kategori wajib diisi');
       return;
     }
 
@@ -122,7 +111,7 @@ class AddMenuController extends GetxController {
 
       await menuController.loadMenuItems();
       Get.back();
-      Get.snackbar('Sukses', 'Menu berhasil ditambahkan');
+      // Get.snackbar('Sukses', 'Menu berhasil ditambahkan');
     } catch (e) {
       Get.snackbar('Error', 'Gagal: $e');
     } finally {

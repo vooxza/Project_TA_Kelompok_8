@@ -145,7 +145,7 @@ class _SplashScreenMobileState extends State<SplashScreenMobile>
                               child: Padding(
                                 padding: const EdgeInsets.all(20),
                                 child: Image.asset(
-                                  'assets/icon/logo_aplikasi.png',
+                                  'assets/images/logo.png',
                                   fit: BoxFit.contain,
                                   errorBuilder: (_, __, ___) => const Icon(
                                     Icons.restaurant,
