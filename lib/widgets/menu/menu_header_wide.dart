@@ -2,13 +2,12 @@ import 'package:flutter/material.dart' hide MenuController;
 import 'package:get/get.dart';
 import '../../controllers/menu_controller.dart';
 import '../../core/services/role_service.dart';
+import '../../core/services/thermal_print_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../routes/app_routes.dart';
 import 'add_menu_button_wide.dart';
 import 'search_box_wide.dart';
 
-/// Header MenuPage versi wide: sapaan + judul di kiri, search box di
-/// tengah, dan tombol "Tambah Menu" (khusus Admin) di kanan.
 class MenuHeaderWide extends StatelessWidget {
   final MenuController controller;
   final String firstName;
@@ -21,9 +20,12 @@ class MenuHeaderWide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ThermalPrintService.checkConnection();
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        // Greeting
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,15 +52,97 @@ class MenuHeaderWide extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 24),
+
+        // Search box
         Expanded(
           flex: 2,
           child: SearchBoxWide(controller: controller),
         ),
+
+        const SizedBox(width: 16),
+
+        // ✅ Indikator & tombol printer
+        _PrinterButtonWide(),
+
         if (RoleService.isAdmin) ...[
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           AddMenuButtonWide(onTap: () => Get.toNamed(AppRoutes.addMenu)),
         ],
       ],
     );
+  }
+}
+
+class _PrinterButtonWide extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final connected = ThermalPrintService.isConnected.value;
+      return GestureDetector(
+        onTap: () async {
+          if (connected) {
+            await ThermalPrintService.disconnectPrinter();
+            Get.snackbar(
+              'Printer',
+              'Printer berhasil diputus',
+              snackPosition: SnackPosition.TOP,
+              backgroundColor: AppColors.bgSurface,
+              colorText: AppColors.textDark,
+              margin: const EdgeInsets.all(12),
+              borderRadius: 12,
+            );
+          } else {
+            final success = await ThermalPrintService.connectToPrinter();
+            Get.snackbar(
+              'Printer',
+              success
+                  ? 'NuPrint MP58 Lite berhasil terhubung'
+                  : 'Gagal terhubung ke printer',
+              snackPosition: SnackPosition.TOP,
+              backgroundColor:
+                  success ? AppColors.successLight : AppColors.errorLight,
+              colorText: success ? AppColors.success : AppColors.error,
+              margin: const EdgeInsets.all(12),
+              borderRadius: 12,
+            );
+          }
+        },
+        child: Stack(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: connected
+                    ? AppColors.successLight
+                    : AppColors.bgSurface,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                Icons.print_rounded,
+                size: 20,
+                color: connected
+                    ? AppColors.success
+                    : AppColors.textMedium,
+              ),
+            ),
+            // Dot status
+            Positioned(
+              top: 6,
+              right: 6,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: connected ? AppColors.success : AppColors.error,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

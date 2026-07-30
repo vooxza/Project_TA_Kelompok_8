@@ -2,13 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/bottomnav_controller.dart';
 import '../../controllers/cart_controller.dart';
+import '../../core/services/thermal_print_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../routes/app_routes.dart';
 
-/// Tombol "Saya Sudah Bayar" + dialog sukses untuk halaman Pembayaran mobile.
 class PayButtonMobile extends StatelessWidget {
   final CartController controller;
   const PayButtonMobile({required this.controller});
+
+  Future<void> _handlePay(BuildContext context) async {
+    // Simpan data cart sebelum di-clear
+    final items = controller.cartItems.map((item) => {
+      'name': item.product.name,
+      'quantity': item.quantity.value,
+      'price': item.product.price,
+    }).toList();
+    final customerName = controller.selectedTable.value ?? '-';
+    final total = controller.totalPrice;
+
+    final success = await controller.checkout(1);
+    if (!success) return;
+
+    // ✅ Print nota otomatis
+    await ThermalPrintService.printNota(
+      invoiceNumber: DateTime.now().millisecondsSinceEpoch.toString(),
+      customerName: customerName,
+      items: items,
+      totalPrice: total,
+      paymentMethod: 'qris',
+    );
+
+    _showSuccessDialog(context);
+  }
 
   void _showSuccessDialog(BuildContext context) {
     final nav = Get.find<BottomNavController>();
@@ -51,7 +76,7 @@ class PayButtonMobile extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               const Text(
-                'Pesanan kamu sedang diproses.\nSilakan ambil nota di kasir.',
+                'Nota sedang dicetak...',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13,
@@ -103,10 +128,7 @@ class PayButtonMobile extends StatelessWidget {
         child: ElevatedButton(
           onPressed: controller.isLoading.value
               ? null
-              : () async {
-                  final success = await controller.checkout(1);
-                  if (success) _showSuccessDialog(context);
-                },
+              : () => _handlePay(context),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.success,
             disabledBackgroundColor: AppColors.success.withOpacity(0.5),
@@ -124,9 +146,9 @@ class PayButtonMobile extends StatelessWidget {
                     strokeWidth: 2.5,
                   ),
                 )
-              : Row(
+              : const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Icon(
                       Icons.check_circle_rounded,
                       color: Colors.white,

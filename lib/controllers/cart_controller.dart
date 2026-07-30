@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:project_ta_kelompok_8/core/theme/app_colors.dart';
 import 'package:project_ta_kelompok_8/models/product_model.dart';
 import 'package:project_ta_kelompok_8/core/services/api_service.dart';
 import 'package:project_ta_kelompok_8/controllers/history_controller.dart';
@@ -76,12 +78,22 @@ class CartController extends GetxController {
   Future<bool> checkout(int userId) async {
     try {
       if (cartItems.isEmpty) {
-        Get.snackbar('Error', 'Cart kosong');
+        Get.snackbar('Perhatian', 'Cart masih kosong',
+        backgroundColor: AppColors.snackbarWarning,
+        colorText: AppColors.textWhite,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(12),
+      );
         return false;
       }
 
       if (selectedTable.value == null) {
-        Get.snackbar('Error', 'Pilih meja dulu');
+        Get.snackbar('Perhatian', 'Isi nama terlebih dahulu',
+        backgroundColor: AppColors.snackbarWarning,
+        colorText: AppColors.textWhite,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(12),
+      );
         return false;
       }
 
@@ -108,7 +120,12 @@ class CartController extends GetxController {
 
       return true; // ← kembalikan true jika sukses
     } catch (e) {
-      Get.snackbar('Error', 'Gagal checkout: $e');
+      Get.snackbar('Gagal', 'Gagal checkout: $e',
+        backgroundColor: AppColors.snackbarError,
+        colorText: AppColors.textWhite,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(12),
+      );
       return false; // ← kembalikan false jika gagal
     } finally {
       isLoading.value = false;

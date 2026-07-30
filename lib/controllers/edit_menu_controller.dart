@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../controllers/menu_controller.dart';
 import '../widgets/dialog_button.dart';
 import '../models/category_model.dart';
+import '../core/theme/app_colors.dart';
 
 class EditMenuController extends GetxController {
   late TextEditingController nameController;
@@ -74,25 +75,32 @@ class EditMenuController extends GetxController {
       if (pickedFile != null) {
         selectedImage.value = pickedFile.path;
 
-        Get.snackbar(
-          'Success',
-          'Image selected',
+        Get.snackbar('Berhasil', 'Gambar berhasil dipilih',
+          backgroundColor: AppColors.snackbarSuccess,
+          colorText: AppColors.textWhite,
           snackPosition: SnackPosition.TOP,
+          margin: const EdgeInsets.all(12),
         );
       }
     } catch (e) {
       debugPrint('Error picking image: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to select image',
+      Get.snackbar('Gagal', 'Gagal memilih gambar',
+        backgroundColor: AppColors.snackbarError,
+        colorText: AppColors.textWhite,
         snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(12),
       );
     }
   }
 
   void saveMenu() async {
     if (nameController.text.isEmpty || priceController.text.isEmpty) {
-      Get.snackbar('Error', 'Name and Price cannot be empty');
+      Get.snackbar('Validasi', 'Nama dan harga tidak boleh kosong',
+        backgroundColor: AppColors.snackbarWarning,
+        colorText: AppColors.textWhite,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(12),
+      );
       return;
     }
 
@@ -121,9 +129,19 @@ class EditMenuController extends GetxController {
 
       // ← balik sampai ke MainPage (MenuPage), skip ProductDetailPage
       Get.until((route) => route.settings.name == '/main');
-      Get.snackbar('Success', 'Menu berhasil diupdate');
+      Get.snackbar('Berhasil', 'Menu berhasil diupdate',
+        backgroundColor: AppColors.snackbarSuccess,
+        colorText: AppColors.textWhite,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(12),
+      );
     } catch (e) {
-      Get.snackbar('Error', 'Gagal update: $e');
+      Get.snackbar('Gagal', 'Gagal update: $e',
+        backgroundColor: AppColors.snackbarError,
+        colorText: AppColors.textWhite,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(12),
+      );
     }
   }
 
@@ -145,9 +163,9 @@ class EditMenuController extends GetxController {
           Get.snackbar(
             'Success',
             'Menu berhasil dihapus',
+            backgroundColor: AppColors.snackbarSuccess,
+            colorText: AppColors.textWhite,
             snackPosition: SnackPosition.TOP,
-            backgroundColor: const Color(0xFFB71C1C),
-            colorText: Colors.white,
             margin: const EdgeInsets.all(12),
           );
         },

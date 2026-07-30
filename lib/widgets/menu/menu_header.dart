@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../core/services/role_service.dart';
+import '../../core/services/thermal_print_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../routes/app_routes.dart';
 
@@ -13,6 +14,9 @@ class MenuHeader extends StatelessWidget {
     final box = GetStorage();
     final name = box.read('name') ?? 'User';
     final firstName = name.split(' ').first;
+
+    // Cek status printer saat header dibuild
+    ThermalPrintService.checkConnection();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -51,6 +55,11 @@ class MenuHeader extends StatelessWidget {
           // Action buttons
           Row(
             children: [
+              // ✅ Indikator & tombol printer
+              _PrinterButton(),
+
+              const SizedBox(width: 8),
+
               if (RoleService.isAdmin)
                 _HeaderButton(
                   icon: Icons.add_rounded,
@@ -69,6 +78,86 @@ class MenuHeader extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _PrinterButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final connected = ThermalPrintService.isConnected.value;
+      return GestureDetector(
+        onTap: () async {
+          if (connected) {
+            await ThermalPrintService.disconnectPrinter();
+            Get.snackbar(
+              'Printer',
+              'Printer berhasil diputus',
+              snackPosition: SnackPosition.TOP,
+              backgroundColor: AppColors.bgSurface,
+              colorText: AppColors.textDark,
+              margin: const EdgeInsets.all(12),
+              borderRadius: 12,
+            );
+          } else {
+            final success = await ThermalPrintService.connectToPrinter();
+            Get.snackbar(
+              'Printer',
+              success
+                  ? 'NuPrint MP58 Lite berhasil terhubung'
+                  : 'Gagal terhubung ke printer',
+              snackPosition: SnackPosition.TOP,
+              backgroundColor:
+                  success ? AppColors.successLight : AppColors.errorLight,
+              colorText:
+                  success ? AppColors.success : AppColors.error,
+              margin: const EdgeInsets.all(12),
+              borderRadius: 12,
+            );
+          }
+        },
+        child: Stack(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: connected
+                    ? AppColors.successLight
+                    : AppColors.bgSurface,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                Icons.print_rounded,
+                size: 20,
+                color: connected
+                    ? AppColors.success
+                    : AppColors.textMedium,
+              ),
+            ),
+            // Dot status
+            Positioned(
+              top: 6,
+              right: 6,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: connected
+                      ? AppColors.success
+                      : AppColors.error,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 1.5,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }
 

@@ -4,8 +4,6 @@ import '../../controllers/cart_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../routes/app_routes.dart';
 
-/// Panel ringkasan pesanan (atas nama, total, tombol lanjut
-/// pembayaran) untuk halaman Keranjang wide.
 class SummaryPanelWide extends StatefulWidget {
   final CartController controller;
   const SummaryPanelWide({required this.controller});
@@ -16,6 +14,7 @@ class SummaryPanelWide extends StatefulWidget {
 
 class SummaryPanelWideState extends State<SummaryPanelWide> {
   late final TextEditingController _nameController;
+  String? _selectedMethod; // 'tunai' atau 'qris'
 
   @override
   void initState() {
@@ -29,6 +28,39 @@ class SummaryPanelWideState extends State<SummaryPanelWide> {
   void dispose() {
     _nameController.dispose();
     super.dispose();
+  }
+
+  void _onLanjut() {
+    if (widget.controller.selectedTable.value == null ||
+        widget.controller.selectedTable.value!.trim().isEmpty) {
+      Get.snackbar(
+        'Atas Nama Kosong',
+        'Silakan isi nama terlebih dahulu',
+        backgroundColor: AppColors.snackbarWarning,
+        colorText: AppColors.textWhite,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(12),
+        borderRadius: 12,
+      );
+      return;
+    }
+    if (_selectedMethod == null) {
+      Get.snackbar(
+        'Metode Belum Dipilih',
+        'Silakan pilih metode pembayaran terlebih dahulu',
+        backgroundColor: AppColors.snackbarWarning,
+        colorText: AppColors.textWhite,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(12),
+        borderRadius: 12,
+      );
+      return;
+    }
+    if (_selectedMethod == 'qris') {
+      Get.toNamed(AppRoutes.payment);
+    } else {
+      Get.toNamed(AppRoutes.paymentCash);
+    }
   }
 
   @override
@@ -101,10 +133,47 @@ class SummaryPanelWideState extends State<SummaryPanelWide> {
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+
+          // Pilih metode bayar
+          const Text(
+            'Metode Pembayaran',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textMedium,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _MethodCard(
+                  icon: Icons.payments_outlined,
+                  label: 'Tunai',
+                  isSelected: _selectedMethod == 'tunai',
+                  color: const Color(0xFF1B6B3A),
+                  onTap: () => setState(() => _selectedMethod = 'tunai'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _MethodCard(
+                  icon: Icons.qr_code_2_rounded,
+                  label: 'QRIS',
+                  isSelected: _selectedMethod == 'qris',
+                  color: AppColors.primaryRed,
+                  onTap: () => setState(() => _selectedMethod = 'qris'),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
           const Divider(color: AppColors.divider),
           const SizedBox(height: 12),
 
+          // Total harga
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -118,7 +187,8 @@ class SummaryPanelWideState extends State<SummaryPanelWide> {
               ),
               Obx(
                 () => Text(
-                  widget.controller.formatRupiah(widget.controller.totalPrice),
+                  widget.controller
+                      .formatRupiah(widget.controller.totalPrice),
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
@@ -132,26 +202,12 @@ class SummaryPanelWideState extends State<SummaryPanelWide> {
 
           const SizedBox(height: 20),
 
+          // Tombol lanjut
           SizedBox(
             width: double.infinity,
             height: 54,
             child: ElevatedButton(
-              onPressed: () {
-                if (widget.controller.selectedTable.value == null ||
-                    widget.controller.selectedTable.value!.trim().isEmpty) {
-                  Get.snackbar(
-                    'Atas Nama Kosong',
-                    'Silakan isi nama terlebih dahulu',
-                    backgroundColor: AppColors.warning,
-                    colorText: AppColors.textWhite,
-                    snackPosition: SnackPosition.TOP,
-                    margin: const EdgeInsets.all(12),
-                    borderRadius: 12,
-                  );
-                  return;
-                }
-                Get.toNamed(AppRoutes.payment);
-              },
+              onPressed: _onLanjut,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryRed,
                 elevation: 0,
@@ -159,9 +215,9 @@ class SummaryPanelWideState extends State<SummaryPanelWide> {
                   borderRadius: BorderRadius.circular(18),
                 ),
               ),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Text(
                     'Lanjut Pembayaran',
                     style: TextStyle(
@@ -178,6 +234,60 @@ class SummaryPanelWideState extends State<SummaryPanelWide> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _MethodCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _MethodCard({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? color.withOpacity(0.08)
+              : AppColors.bgSurfaceLight,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? color : AppColors.borderLight,
+            width: isSelected ? 2 : 1.5,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon,
+                size: 18,
+                color: isSelected ? color : AppColors.textLight),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: isSelected ? color : AppColors.textMedium,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

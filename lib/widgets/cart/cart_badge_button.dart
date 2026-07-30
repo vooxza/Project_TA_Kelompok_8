@@ -28,7 +28,7 @@ class CartBadgeButton extends StatelessWidget {
               Get.snackbar(
                 'Ditambahkan!',
                 '${item.name} masuk ke keranjang',
-                backgroundColor: AppColors.primaryRed,
+                backgroundColor: AppColors.snackbarSuccess,
                 colorText: AppColors.textWhite,
                 snackPosition: SnackPosition.TOP,
                 margin: const EdgeInsets.all(12),

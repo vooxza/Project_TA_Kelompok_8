@@ -3,12 +3,12 @@ import 'package:project_ta_kelompok_8/bindings/profile_binding.dart';
 import 'package:project_ta_kelompok_8/pages/history_page.dart';
 import 'package:project_ta_kelompok_8/pages/login_page.dart';
 import 'package:project_ta_kelompok_8/pages/main_page.dart';
-// import 'package:project_ta_kelompok_8/pages/home_page.dart';
 import 'package:project_ta_kelompok_8/pages/menu_page.dart';
 import 'package:project_ta_kelompok_8/pages/edit_menu_page.dart';
 import 'package:project_ta_kelompok_8/pages/add_menu_page.dart';
 import 'package:project_ta_kelompok_8/pages/cart_page.dart';
 import 'package:project_ta_kelompok_8/pages/payment_page.dart';
+import 'package:project_ta_kelompok_8/pages/payment_cash_page.dart';
 import 'package:project_ta_kelompok_8/pages/product_detail.dart';
 import 'package:project_ta_kelompok_8/pages/profile_page.dart';
 import 'package:project_ta_kelompok_8/pages/splashscreen.dart';
@@ -17,7 +17,6 @@ import 'package:project_ta_kelompok_8/routes/app_routes.dart';
 import 'package:project_ta_kelompok_8/bindings/history_binding.dart';
 import '../bindings/login_binding.dart';
 import '../bindings/main_binding.dart';
-// import '../bindings/homepage_binding.dart';
 import '../bindings/menu_binding.dart';
 import '../bindings/edit_menu_binding.dart';
 import '../bindings/add_menu_binding.dart';
@@ -45,19 +44,12 @@ class AppPages {
       binding: LoginBinding(),
       transition: Transition.fadeIn,
     ),
-    // ← tambah MainPage
     GetPage(
       name: AppRoutes.main,
       page: () => const MainPage(),
       binding: MainBinding(),
       transition: Transition.fadeIn,
     ),
-    // GetPage(
-    //   name: AppRoutes.homepage,
-    //   page: () => HomePage(),
-    //   binding: HomePageBinding(),
-    //   transition: Transition.fadeIn,
-    // ),
     GetPage(
       name: AppRoutes.menu,
       page: () => MenuPage(),
@@ -88,6 +80,11 @@ class AppPages {
       transition: Transition.rightToLeft,
     ),
     GetPage(
+      name: AppRoutes.paymentCash,
+      page: () => const PaymentCashPage(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
       name: AppRoutes.profile,
       page: () => ProfilePage(),
       binding: ProfileBinding(),
@@ -104,6 +101,5 @@ class AppPages {
       page: () => ProductDetailPage(),
       transition: Transition.rightToLeft,
     ),
-    
   ];
 }

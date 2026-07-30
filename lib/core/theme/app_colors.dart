@@ -33,12 +33,16 @@ class AppColors {
   static const Color accentGoldLight = Color(0xFFF5B94E);
   static const Color accentGoldSoft = Color(0xFFFFF0D6);
   
-  // Semantic Colors
+  // Snackbar Colors
+  static const Color snackbarSuccess = Color(0xFF2D8B4E); // hijau — aksi berhasil
+  static const Color snackbarError   = Color(0xFFD32F2F); // merah — error/gagal
+  static const Color snackbarWarning = Color.fromARGB(255, 235, 160, 0); // biru  — peringatan/validasi
+  static const Color snackbarInfo    = Color(0xFF1565C0); // biru  — informasi netral
   static const Color success = Color(0xFF2D8B4E);
   static const Color successLight = Color(0xFFE8F5ED);
   static const Color error = Color(0xFFD32F2F);
   static const Color errorLight = Color(0xFFFFEBEE);
-  static const Color warning = Color(0xFFE8962A);
+  static const Color warning = Color(0xFF1565C0);
   static const Color warningLight = Color(0xFFFFF3E0);
   static const Color info = Color(0xFF1565C0);
 

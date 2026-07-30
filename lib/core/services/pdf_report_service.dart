@@ -2,29 +2,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
-/// Service untuk membuat & menampilkan/membagikan laporan penjualan
-/// (Riwayat Pesanan) dalam bentuk PDF.
-///
-/// PENTING: package `pdf` dan `printing` belum tentu ada di pubspec.yaml
-/// project ini (karena project di-zip cuma folder `lib/`). Tambahkan dulu
-/// ke pubspec.yaml sebelum build:
-///
-/// ```yaml
-/// dependencies:
-///   pdf: ^3.11.1
-///   printing: ^5.13.1
-/// ```
-///
-/// lalu jalankan `flutter pub get`.
 class PdfReportService {
-  /// Membuat dokumen PDF laporan penjualan dari daftar order.
-  ///
-  /// [orders] : list order (format sama dengan `HistoryController.orderList`,
-  /// tiap order adalah Map dengan key `order_number`, `table_number`,
-  /// `created_at`, `items` (list of {product_name, quantity, price}),
-  /// `total_price`).
-  /// [periodLabel] : label periode yang sedang difilter, misal
-  /// "Juli 2026" atau "19 Jul 2026". Kalau null, dianggap "Semua Transaksi".
   static Future<pw.Document> buildSalesReport({
     required List orders,
     String? periodLabel,
@@ -39,7 +17,6 @@ class PdfReportService {
     final now = DateTime.now();
     final generatedAt = _formatDateTime(now);
 
-    // Baris tabel: satu order = satu baris (item digabung jadi satu teks)
     final rows = <List<String>>[];
     var no = 1;
     for (final order in orders) {
@@ -47,8 +24,7 @@ class PdfReportService {
       final itemsText = items
           .map((it) => '${it['quantity']}x ${it['product_name'] ?? '-'}')
           .join(', ');
-      final total =
-          double.tryParse(order['total_price'].toString()) ?? 0;
+      final total = double.tryParse(order['total_price'].toString()) ?? 0;
 
       rows.add([
         '${no++}',
@@ -59,6 +35,18 @@ class PdfReportService {
         _formatRupiah(total),
       ]);
     }
+
+    // Header tabel — dipakai di tableHeader supaya repeat tiap halaman
+    final tableHeaders = ['No', 'Invoice', 'Pemesan', 'Tanggal', 'Item', 'Total'];
+
+    const columnWidths = {
+      0: pw.FlexColumnWidth(0.5),
+      1: pw.FlexColumnWidth(1.3),
+      2: pw.FlexColumnWidth(1.1),
+      3: pw.FlexColumnWidth(1.4),
+      4: pw.FlexColumnWidth(2.8),
+      5: pw.FlexColumnWidth(1.3),
+    };
 
     doc.addPage(
       pw.MultiPage(
@@ -76,16 +64,25 @@ class PdfReportService {
             ),
             pw.Text(
               'Warung Soto Mbok Kerso',
-              style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
+              style: const pw.TextStyle(
+                fontSize: 12,
+                color: PdfColors.grey700,
+              ),
             ),
             pw.SizedBox(height: 4),
             pw.Text(
               'Periode: ${periodLabel ?? 'Semua Transaksi'}',
-              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+              style: const pw.TextStyle(
+                fontSize: 10,
+                color: PdfColors.grey700,
+              ),
             ),
             pw.Text(
               'Dicetak pada: $generatedAt',
-              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+              style: const pw.TextStyle(
+                fontSize: 10,
+                color: PdfColors.grey700,
+              ),
             ),
             pw.SizedBox(height: 12),
             pw.Divider(color: PdfColors.grey400),
@@ -96,12 +93,15 @@ class PdfReportService {
           children: [
             pw.Text(
               'Halaman ${context.pageNumber} dari ${context.pagesCount}',
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
+              style: const pw.TextStyle(
+                fontSize: 9,
+                color: PdfColors.grey600,
+              ),
             ),
           ],
         ),
         build: (context) => [
-          // Ringkasan
+          // ── Ringkasan ──
           pw.Container(
             padding: const pw.EdgeInsets.all(14),
             decoration: pw.BoxDecoration(
@@ -158,7 +158,7 @@ class PdfReportService {
           ),
           pw.SizedBox(height: 18),
 
-          // Tabel transaksi
+          // ── Tabel dengan header repeat tiap halaman ──
           if (rows.isEmpty)
             pw.Padding(
               padding: const pw.EdgeInsets.symmetric(vertical: 24),
@@ -170,53 +170,31 @@ class PdfReportService {
               ),
             )
           else
-            pw.Table(
-              border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
-              columnWidths: const {
-                0: pw.FlexColumnWidth(0.5),
-                1: pw.FlexColumnWidth(1.3),
-                2: pw.FlexColumnWidth(1.1),
-                3: pw.FlexColumnWidth(1.4),
-                4: pw.FlexColumnWidth(2.8),
-                5: pw.FlexColumnWidth(1.3),
-              },
-              children: [
-                pw.TableRow(
-                  decoration: const pw.BoxDecoration(color: PdfColors.grey200),
-                  children: [
-                    'No',
-                    'Invoice',
-                    'Pemesan',
-                    'Tanggal',
-                    'Item',
-                    'Total',
-                  ]
-                      .map((h) => pw.Padding(
-                            padding: const pw.EdgeInsets.all(6),
-                            child: pw.Text(
-                              h,
-                              style: pw.TextStyle(
-                                fontSize: 9,
-                                fontWeight: pw.FontWeight.bold,
-                              ),
-                            ),
-                          ))
-                      .toList(),
-                ),
-                ...rows.map(
-                  (row) => pw.TableRow(
-                    children: row
-                        .map((cell) => pw.Padding(
-                              padding: const pw.EdgeInsets.all(6),
-                              child: pw.Text(
-                                cell,
-                                style: const pw.TextStyle(fontSize: 9),
-                              ),
-                            ))
-                        .toList(),
-                  ),
-                ),
-              ],
+            pw.TableHelper.fromTextArray(
+              border: pw.TableBorder.all(
+                color: PdfColors.grey300,
+                width: 0.5,
+              ),
+              columnWidths: columnWidths,
+              // ✅ Header repeat otomatis tiap halaman
+              headers: tableHeaders,
+              headerStyle: pw.TextStyle(
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+              headerDecoration: const pw.BoxDecoration(
+                color: PdfColors.grey200,
+              ),
+              headerPadding: const pw.EdgeInsets.all(6),
+              data: rows,
+              cellStyle: const pw.TextStyle(fontSize: 9),
+              cellPadding: const pw.EdgeInsets.all(6),
+              rowDecoration: const pw.BoxDecoration(
+                color: PdfColors.white,
+              ),
+              oddRowDecoration: const pw.BoxDecoration(
+                color: PdfColors.grey50,
+              ),
             ),
         ],
       ),
@@ -225,16 +203,18 @@ class PdfReportService {
     return doc;
   }
 
-  /// Menampilkan preview PDF (bisa langsung print / simpan / share dari
-  /// sana), pakai package `printing`.
   static Future<void> previewSalesReport({
     required List orders,
     String? periodLabel,
   }) async {
-    final doc = await buildSalesReport(orders: orders, periodLabel: periodLabel);
-    await Printing.layoutPdf(
-      onLayout: (format) async => doc.save(),
-      name: 'laporan-penjualan-mbok-kerso.pdf',
+    final doc = await buildSalesReport(
+      orders: orders,
+      periodLabel: periodLabel,
+    );
+    final bytes = await doc.save();
+    await Printing.sharePdf(
+      bytes: bytes,
+      filename: 'laporan-penjualan-mbok-kerso.pdf',
     );
   }
 
