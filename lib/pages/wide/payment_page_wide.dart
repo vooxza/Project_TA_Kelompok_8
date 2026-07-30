@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controllers/bottomnav_controller.dart';
 import '../../controllers/cart_controller.dart';
 import '../../core/theme/app_colors.dart';
-import '../../routes/app_routes.dart';
 import '../../widgets/common/wide_page_container.dart';
-import '../../widgets/dialog_button.dart';
+// ignore: unused_import
 import '../../widgets/payment/pay_button_wide.dart';
 import '../../widgets/payment/qr_section_wide.dart';
 import '../../widgets/payment/total_card_wide.dart';
 
-/// Versi widescreen dari PaymentPage. Sama seperti versi mobile (QRIS,
-/// total, tombol "Saya Sudah Bayar", dialog sukses) — hanya reflow jadi
-/// dua kolom: kartu total di kiri, QR + tombol bayar di kanan. Memakai
-/// [WidePageContainer] supaya tampilannya satu kanvas cream penuh.
 class PaymentPageWide extends GetView<CartController> {
   const PaymentPageWide({super.key});
 
@@ -28,7 +22,7 @@ class PaymentPageWide extends GetView<CartController> {
           Row(
             children: [
               GestureDetector(
-                onTap: () => _showCancelDialog(),
+                onTap: () => Get.back(),
                 child: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
@@ -57,11 +51,12 @@ class PaymentPageWide extends GetView<CartController> {
             ],
           ),
           const SizedBox(height: 28),
+
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Kiri: Total card + info
+                // Kiri: Total card + instruksi + tombol bayar
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,6 +77,7 @@ class PaymentPageWide extends GetView<CartController> {
                   ),
                 ),
                 const SizedBox(width: 32),
+
                 // Kanan: QR section
                 Expanded(
                   child: QRSectionWide(controller: controller),
@@ -90,24 +86,6 @@ class PaymentPageWide extends GetView<CartController> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showCancelDialog() {
-    Get.dialog(
-      CustomDialog(
-        title: 'Batalkan Pesanan?',
-        message: 'Apakah yakin ingin membatalkan pesanan ini?',
-        textCancel: 'Tidak',
-        textConfirm: 'Ya, Batalkan',
-        onCancel: () {},
-        onConfirm: () {
-          Get.back();
-          controller.clearCart();
-          Get.find<BottomNavController>().goToForce(0);
-          Get.offAllNamed(AppRoutes.main);
-        },
       ),
     );
   }

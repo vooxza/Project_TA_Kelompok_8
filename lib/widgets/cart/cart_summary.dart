@@ -16,11 +16,11 @@ class CartSummary extends StatefulWidget {
 
 class _CartSummaryState extends State<CartSummary> {
   late final TextEditingController _nameController;
+  String? _selectedMethod; // 'tunai' atau 'qris'
 
   @override
   void initState() {
     super.initState();
-    // Inisialisasi sekali, pakai nilai yang sudah ada jika ada
     _nameController = TextEditingController(
       text: widget.controller.selectedTable.value ?? '',
     );
@@ -30,6 +30,39 @@ class _CartSummaryState extends State<CartSummary> {
   void dispose() {
     _nameController.dispose();
     super.dispose();
+  }
+
+  void _onLanjut() {
+    if (widget.controller.selectedTable.value == null ||
+        widget.controller.selectedTable.value!.trim().isEmpty) {
+      Get.snackbar(
+        'Atas Nama Kosong',
+        'Silakan isi nama terlebih dahulu',
+        backgroundColor: AppColors.snackbarWarning,
+        colorText: AppColors.textWhite,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(12),
+        borderRadius: 12,
+      );
+      return;
+    }
+    if (_selectedMethod == null) {
+      Get.snackbar(
+        'Metode Belum Dipilih',
+        'Silakan pilih metode pembayaran terlebih dahulu',
+        backgroundColor: AppColors.snackbarWarning,
+        colorText: AppColors.textWhite,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(12),
+        borderRadius: 12,
+      );
+      return;
+    }
+    if (_selectedMethod == 'qris') {
+      Get.toNamed(AppRoutes.payment);
+    } else {
+      Get.toNamed(AppRoutes.paymentCash);
+    }
   }
 
   @override
@@ -51,6 +84,7 @@ class _CartSummaryState extends State<CartSummary> {
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Atas Nama input
           Container(
@@ -99,7 +133,43 @@ class _CartSummaryState extends State<CartSummary> {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
+
+          // Pilih metode bayar
+          const Text(
+            'Metode Pembayaran',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textMedium,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _MethodCard(
+                  icon: Icons.payments_outlined,
+                  label: 'Tunai',
+                  isSelected: _selectedMethod == 'tunai',
+                  color: const Color(0xFF1B6B3A),
+                  onTap: () => setState(() => _selectedMethod = 'tunai'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _MethodCard(
+                  icon: Icons.qr_code_2_rounded,
+                  label: 'QRIS',
+                  isSelected: _selectedMethod == 'qris',
+                  color: AppColors.primaryRed,
+                  onTap: () => setState(() => _selectedMethod = 'qris'),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
 
           // Price row
           Row(
@@ -127,29 +197,14 @@ class _CartSummaryState extends State<CartSummary> {
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
           // Checkout button
           SizedBox(
             width: double.infinity,
             height: 54,
             child: ElevatedButton(
-              onPressed: () {
-                if (widget.controller.selectedTable.value == null ||
-                    widget.controller.selectedTable.value!.trim().isEmpty) {
-                  Get.snackbar(
-                    'Atas Nama Kosong',
-                    'Silakan isi nama terlebih dahulu',
-                    backgroundColor: AppColors.warning,
-                    colorText: AppColors.textWhite,
-                    snackPosition: SnackPosition.TOP,
-                    margin: const EdgeInsets.all(12),
-                    borderRadius: 12,
-                  );
-                  return;
-                }
-                Get.toNamed(AppRoutes.payment);
-              },
+              onPressed: _onLanjut,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryRed,
                 elevation: 0,
@@ -181,6 +236,56 @@ class _CartSummaryState extends State<CartSummary> {
 
           const SizedBox(height: 8),
         ],
+      ),
+    );
+  }
+}
+
+class _MethodCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _MethodCard({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withOpacity(0.08) : AppColors.bgSurfaceLight,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? color : AppColors.borderLight,
+            width: isSelected ? 2 : 1.5,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18, color: isSelected ? color : AppColors.textLight),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: isSelected ? color : AppColors.textMedium,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
