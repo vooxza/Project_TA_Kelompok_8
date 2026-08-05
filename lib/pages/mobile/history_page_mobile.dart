@@ -88,13 +88,12 @@ class HistoryPageMobile extends GetView<HistoryController> {
   }
 
   void _showFilterSheet(BuildContext context) {
-    final (allDates, uniqueMonths) =
+    final (_, uniqueMonths) =
         HistoryFilterUtils.uniqueDatesAndMonths(controller);
 
     Get.bottomSheet(
       HistoryFilterSheet(
         controller: controller,
-        allDates: allDates,
         uniqueMonths: uniqueMonths,
         monthNames: HistoryFilterUtils.monthNamesLong,
         monthShort: HistoryFilterUtils.monthNamesShort,
