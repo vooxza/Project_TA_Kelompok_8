@@ -5,6 +5,7 @@ import '../../core/services/role_service.dart';
 import '../../core/services/thermal_print_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../routes/app_routes.dart';
+import '../printer/printer_connect_sheet.dart';
 import 'add_menu_button_wide.dart';
 import 'search_box_wide.dart';
 
@@ -79,34 +80,7 @@ class _PrinterButtonWide extends StatelessWidget {
     return Obx(() {
       final connected = ThermalPrintService.isConnected.value;
       return GestureDetector(
-        onTap: () async {
-          if (connected) {
-            await ThermalPrintService.disconnectPrinter();
-            Get.snackbar(
-              'Printer',
-              'Printer berhasil diputus',
-              snackPosition: SnackPosition.TOP,
-              backgroundColor: AppColors.bgSurface,
-              colorText: AppColors.textDark,
-              margin: const EdgeInsets.all(12),
-              borderRadius: 12,
-            );
-          } else {
-            final success = await ThermalPrintService.connectToPrinter();
-            Get.snackbar(
-              'Printer',
-              success
-                  ? 'NuPrint MP58 Lite berhasil terhubung'
-                  : 'Gagal terhubung ke printer',
-              snackPosition: SnackPosition.TOP,
-              backgroundColor:
-                  success ? AppColors.successLight : AppColors.errorLight,
-              colorText: success ? AppColors.success : AppColors.error,
-              margin: const EdgeInsets.all(12),
-              borderRadius: 12,
-            );
-          }
-        },
+        onTap: () => showPrinterConnectSheet(context),
         child: Stack(
           children: [
             Container(

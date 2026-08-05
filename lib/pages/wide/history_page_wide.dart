@@ -88,7 +88,7 @@ class HistoryPageWide extends GetView<HistoryController> {
   }
 
   void _showFilterSheet() {
-    final (allDates, uniqueMonths) =
+    final (_, uniqueMonths) =
         HistoryFilterUtils.uniqueDatesAndMonths(controller);
 
     // Dipusatkan & dibatasi lebarnya supaya enak dilihat di layar lebar,
@@ -103,7 +103,6 @@ class HistoryPageWide extends GetView<HistoryController> {
                 const BorderRadius.vertical(top: Radius.circular(24)),
             child: HistoryFilterSheet(
               controller: controller,
-              allDates: allDates,
               uniqueMonths: uniqueMonths,
               monthNames: HistoryFilterUtils.monthNamesLong,
               monthShort: HistoryFilterUtils.monthNamesShort,

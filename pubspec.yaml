@@ -49,6 +49,7 @@ dependencies:
   printing: ^5.14.3
   flutter_thermal_printer: ^1.2.4
   esc_pos_utils_plus: ^2.0.4
+  win32: ^5.15.0
   
 
 dev_dependencies:

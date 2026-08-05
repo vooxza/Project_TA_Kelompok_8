@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Filter printer thermal USB.
+     Dikosongkan agar SEMUA printer USB terdeteksi (universal).
+     Jika printer sudah pasti, bisa diisi vendor-id & product-id di sini. -->
+<resources>
+</resources>

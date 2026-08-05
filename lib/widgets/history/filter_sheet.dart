@@ -6,7 +6,6 @@ import 'filter_chips.dart';
 
 class HistoryFilterSheet extends StatefulWidget {
   final HistoryController controller;
-  final List<DateTime> allDates;
   final List<DateTime> uniqueMonths;
   final List<String> monthNames;
   final List<String> monthShort;
@@ -14,7 +13,6 @@ class HistoryFilterSheet extends StatefulWidget {
   const HistoryFilterSheet({
     super.key,
     required this.controller,
-    required this.allDates,
     required this.uniqueMonths,
     required this.monthNames,
     required this.monthShort,
@@ -37,14 +35,6 @@ class _HistoryFilterSheetState extends State<HistoryFilterSheet> {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final todayOnly = DateTime(now.year, now.month, now.day);
-
-    final datesInExpandedMonth = expandedMonth == null
-        ? <DateTime>[]
-        : widget.allDates
-            .where((d) =>
-                d.year == expandedMonth!.year &&
-                d.month == expandedMonth!.month)
-            .toList();
 
     return Container(
       decoration: const BoxDecoration(

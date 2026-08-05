@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import '../../controllers/cart_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../routes/app_routes.dart';
-import 'table_dropdown.dart';
 
 class CartSummary extends StatefulWidget {
   final CartController controller;
