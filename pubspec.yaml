@@ -50,6 +50,7 @@ dependencies:
   flutter_thermal_printer: ^1.2.4
   esc_pos_utils_plus: ^2.0.4
   win32: ^5.15.0
+  url_launcher: ^6.3.2
   
 
 dev_dependencies:

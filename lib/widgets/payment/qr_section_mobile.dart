@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/cart_controller.dart';
 import '../../core/theme/app_colors.dart';
+import 'qris_image_box.dart';
 
 /// Kartu QRIS untuk halaman Pembayaran mobile.
 class QRSectionMobile extends StatelessWidget {
@@ -63,28 +64,9 @@ class QRSectionMobile extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // QR code box
-          Container(
-            width: 220,
-            height: 220,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.borderLight,
-                width: 2,
-              ),
-            ),
-            child: const ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(14)),
-              child: Center(
-                child: Icon(
-                  Icons.qr_code_2_rounded,
-                  size: 180,
-                  color: AppColors.textDark,
-                ),
-              ),
-            ),
-          ),
+          // QR / status pembayaran (fetch beneran dari Midtrans lewat
+          // CartController.startQrisPayment(), bukan lagi icon dummy)
+          QrisImageBox(controller: controller),
 
           const SizedBox(height: 20),
 

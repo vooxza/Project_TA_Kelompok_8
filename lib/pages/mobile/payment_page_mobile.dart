@@ -18,7 +18,10 @@ class PaymentPageMobile extends GetView<CartController> {
         elevation: 0,
         centerTitle: true,
         leading: GestureDetector(
-          onTap: () => Get.back(), // ✅ langsung back tanpa dialog
+          onTap: () {
+            controller.resetQrisPayment(); 
+            Get.back();
+          },
           child: Container(
             margin: const EdgeInsets.all(10),
             decoration: BoxDecoration(

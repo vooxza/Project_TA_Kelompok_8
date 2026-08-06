@@ -6,8 +6,8 @@ import '../core/theme/app_colors.dart';
 import '../pages/menu_page.dart';
 import '../pages/cart_page.dart';
 import '../pages/history_page.dart';
-import '../widgets/bottom_nav_bar.dart';
-import '../widgets/wide_nav_drawer.dart';
+import '../widgets/navigation/bottom_nav_bar.dart';
+import '../widgets/navigation/wide_nav_drawer.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
