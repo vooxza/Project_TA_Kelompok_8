@@ -399,6 +399,7 @@ class ThermalPrintService {
   }) async {
     try {
       final connected = await _ensureConnected();
+
       if (!connected) {
         _showSnackbar(
           'Printer Tidak Terhubung',
@@ -409,111 +410,163 @@ class ThermalPrintService {
       }
 
       final now = DateTime.now();
+
       const months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-        'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'Mei',
+        'Jun',
+        'Jul',
+        'Agu',
+        'Sep',
+        'Okt',
+        'Nov',
+        'Des',
       ];
+
       final dateStr =
           '${now.day} ${months[now.month - 1]} ${now.year} '
           '${now.hour.toString().padLeft(2, '0')}:'
           '${now.minute.toString().padLeft(2, '0')}';
 
       final profile = await CapabilityProfile.load();
-      // Ganti PaperSize.mm58 jika kertas printer kamu 58mm
-      final generator = Generator(PaperSize.mm80, profile);
+
+      // MP58 = 58 mm
+      final generator = Generator(PaperSize.mm58, profile);
 
       List<int> bytes = [];
 
+      String formatLine(String left, String right) {
+        const totalWidth = 32;
+
+        final spaces = totalWidth - left.length - right.length;
+
+        if (spaces <= 0) {
+          return '$left $right';
+        }
+
+        return left + (' ' * spaces) + right;
+      }
+
       bytes += generator.text(
         'WARUNG SOTO MBOK KERSO',
-        styles: const PosStyles(align: PosAlign.center, bold: true),
-      );
-      bytes += generator.text(
-        'Jl. Contoh No. 1, Semarang',
-        styles: const PosStyles(align: PosAlign.center),
-      );
-      bytes += generator.text(
-        '--------------------------------',
-        styles: const PosStyles(align: PosAlign.center),
+        styles: const PosStyles(
+          align: PosAlign.center,
+          bold: true,
+        ),
       );
 
-      bytes += generator.row([
-        PosColumn(text: 'Invoice', width: 4, styles: const PosStyles(bold: true)),
-        PosColumn(text: invoiceNumber, width: 8, styles: const PosStyles(align: PosAlign.right)),
-      ]);
-      bytes += generator.row([
-        PosColumn(text: 'Pemesan', width: 4, styles: const PosStyles(bold: true)),
-        PosColumn(text: customerName, width: 8, styles: const PosStyles(align: PosAlign.right)),
-      ]);
-      bytes += generator.row([
-        PosColumn(text: 'Tanggal', width: 4),
-        PosColumn(text: dateStr, width: 8, styles: const PosStyles(align: PosAlign.right)),
-      ]);
       bytes += generator.text(
-        '--------------------------------',
-        styles: const PosStyles(align: PosAlign.center),
+        'Jl. Contoh No. 1, Semarang',
+        styles: const PosStyles(
+          align: PosAlign.center,
+        ),
       );
+
+      bytes += generator.hr();
+
+      bytes += generator.text(
+        formatLine('Invoice', invoiceNumber),
+        styles: const PosStyles(
+          bold: true,
+        ),
+      );
+
+      bytes += generator.text(
+        formatLine('Pemesan', customerName),
+      );
+
+      bytes += generator.text(
+        formatLine('Tanggal', dateStr),
+      );
+
+      bytes += generator.hr();
 
       for (final item in items) {
         final name = item['name'].toString();
         final qty = item['quantity'] as int;
         final price = item['price'] as double;
-        final subtotal = _formatRupiah(price * qty);
 
-        bytes += generator.text('$qty x $name');
-        bytes += generator.row([
-          PosColumn(text: '  @${_formatRupiah(price)}', width: 6),
-          PosColumn(text: subtotal, width: 6, styles: const PosStyles(align: PosAlign.right)),
-        ]);
+        bytes += generator.text(
+          '$qty x $name',
+        );
+
+        bytes += generator.text(
+          formatLine(
+            '@${_formatRupiah(price)}',
+            _formatRupiah(price * qty),
+          ),
+        );
       }
 
+      bytes += generator.hr();
+
       bytes += generator.text(
-        '--------------------------------',
-        styles: const PosStyles(align: PosAlign.center),
-      );
-      bytes += generator.row([
-        PosColumn(text: 'TOTAL', width: 4, styles: const PosStyles(bold: true)),
-        PosColumn(
-          text: _formatRupiah(totalPrice),
-          width: 8,
-          styles: const PosStyles(align: PosAlign.right, bold: true),
+        formatLine(
+          'TOTAL',
+          _formatRupiah(totalPrice),
         ),
-      ]);
+        styles: const PosStyles(
+          bold: true,
+        ),
+      );
 
-      if (paymentMethod == 'tunai' && cashGiven != null && change != null) {
-        bytes += generator.row([
-          PosColumn(text: 'Bayar', width: 4),
-          PosColumn(text: _formatRupiah(cashGiven), width: 8, styles: const PosStyles(align: PosAlign.right)),
-        ]);
-        bytes += generator.row([
-          PosColumn(text: 'Kembali', width: 4),
-          PosColumn(text: _formatRupiah(change), width: 8, styles: const PosStyles(align: PosAlign.right)),
-        ]);
+      if (paymentMethod == 'tunai' &&
+          cashGiven != null &&
+          change != null) {
+        bytes += generator.text(
+          formatLine(
+            'Bayar',
+            _formatRupiah(cashGiven),
+          ),
+        );
+
+        bytes += generator.text(
+          formatLine(
+            'Kembali',
+            _formatRupiah(change),
+          ),
+        );
       }
 
-      bytes += generator.text(
-        '--------------------------------',
-        styles: const PosStyles(align: PosAlign.center),
-      );
+      bytes += generator.hr();
+
       bytes += generator.text(
         'Pembayaran: ${paymentMethod.toUpperCase()}',
-        styles: const PosStyles(align: PosAlign.center),
+        styles: const PosStyles(
+          align: PosAlign.center,
+        ),
       );
+
       bytes += generator.emptyLines(1);
+
       bytes += generator.text(
         'Terima kasih sudah makan',
-        styles: const PosStyles(align: PosAlign.center),
+        styles: const PosStyles(
+          align: PosAlign.center,
+        ),
       );
+
       bytes += generator.text(
         'di Warung Soto Mbok Kerso!',
-        styles: const PosStyles(align: PosAlign.center),
+        styles: const PosStyles(
+          align: PosAlign.center,
+        ),
       );
+
       bytes += generator.emptyLines(3);
+
       bytes += generator.cut();
 
       await _sendBytes(bytes);
     } catch (e) {
-      _showSnackbar('Gagal Print', 'Error: $e', isError: true);
+      _showSnackbar(
+        'Gagal Print',
+        'Error: $e',
+        isError: true,
+      );
     }
   }
 

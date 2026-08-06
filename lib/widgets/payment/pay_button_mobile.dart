@@ -158,7 +158,7 @@ class PayButtonMobile extends StatelessWidget {
             ],
             SizedBox(
               width: double.infinity,
-              height: 58,
+              height: 56,
               child: ElevatedButton(
                 onPressed: canConfirm ? () => _handlePay(context) : null,
                 style: ElevatedButton.styleFrom(
@@ -166,7 +166,7 @@ class PayButtonMobile extends StatelessWidget {
                   disabledBackgroundColor: AppColors.borderLight,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                 ),
                 child: controller.isVerifyingPayment.value
@@ -181,10 +181,9 @@ class PayButtonMobile extends StatelessWidget {
                     : const Text(
                         'Konfirmasi Pembayaran',
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: 0.3,
+                          color: AppColors.textWhite,
                         ),
                       ),
               ),
