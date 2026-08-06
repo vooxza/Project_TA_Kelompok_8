@@ -343,7 +343,7 @@ class ApiService {
     return Order.fromJson(response['data'] ?? response);
   }
 
-  Future<void> createOrder({
+  Future<Order> createOrder({
     required double totalPrice,
     required String tableNumber,
     required List<Map<String, dynamic>> items,
@@ -370,6 +370,71 @@ class ApiService {
         'Failed to post data: ${response.statusCode} - ${response.body}',
       );
     }
+
+    final decoded = jsonDecode(response.body);
+    final data = decoded is Map ? (decoded['data'] ?? decoded) : decoded;
+    return Order.fromJson(data);
+  }
+
+  // ================== QRIS PAYMENT GATEWAY ==================
+  // Kontrak sudah diverifikasi langsung ke backend (bukan tebakan):
+  //   POST /api/payment/qris   body: { "order_number": "ORDER-XXXX" }
+  //   GET  /api/payment/status/{order_number}
+  // Kedua-duanya butuh header Authorization: Bearer <token> (sudah otomatis
+  // dikirim oleh _postRequest/_getRequest).
+
+  /// Minta pembayaran QRIS untuk sebuah order yang SUDAH dibuat. [orderNumber]
+  /// wajib diisi (bukan id numerik, tapi kode order seperti "ORDER-0005").
+  ///
+  /// PENTING: kontrak backend saat ini balikin `snap_token` (dari Midtrans
+  /// Snap API), BUKAN gambar QRIS langsung. Jadi return value method ini
+  /// adalah URL HALAMAN PEMBAYARAN Midtrans (Snap redirection page) yang
+  /// harus dibuka di browser/webview — bukan URL gambar buat <Image.network>.
+  /// Kalau suatu saat backend diganti ke Core API QRIS charge (yang balikin
+  /// qris_url/qr_url beneran), method ini otomatis makai itu duluan.
+  Future<String> generateQris(String orderNumber) async {
+    final response = await _postRequest('/payment/qris', {
+      'order_number': orderNumber,
+    });
+
+    // Backend membalas { success: false, message: "..." } untuk kasus
+    // error (mis. order sudah lunas) — lempar pesannya apa adanya supaya
+    // gampang ditampilkan ke user.
+    if (response is Map && response['success'] == false) {
+      throw Exception(response['message'] ?? 'Gagal membuat QRIS');
+    }
+
+    final data = response is Map ? (response['data'] ?? response) : response;
+
+    // Kasus ideal (kalau backend nanti pakai Core API QRIS charge):
+    // ada gambar QR beneran, langsung dipakai.
+    final directUrl = data is Map
+        ? (data['qris_url'] ?? data['qr_url'] ?? data['url'])
+        : null;
+    if (directUrl != null && directUrl.toString().isNotEmpty) {
+      return directUrl.toString();
+    }
+
+    // Kasus SEKARANG: backend balikin Snap token → susun URL halaman
+    // pembayaran Midtrans-nya.
+    final snapToken = data is Map ? data['snap_token'] : null;
+    if (snapToken != null && snapToken.toString().isNotEmpty) {
+      // TODO: pas go-live, ganti ke 'https://app.midtrans.com/snap/v4/redirection/'
+      // (tanpa "sandbox") sesuai environment Midtrans yang dipakai backend.
+      return 'https://app.sandbox.midtrans.com/snap/v4/redirection/$snapToken';
+    }
+
+    throw Exception(
+      'Response QRIS tidak berisi qris_url maupun snap_token: $response',
+    );
+  }
+
+  /// Cek status pembayaran untuk sebuah order (dipoll sampai "paid").
+  Future<String> getQrisPaymentStatus(String orderNumber) async {
+    final response = await _getRequest('/payment/status/$orderNumber');
+    final data = response is Map ? (response['data'] ?? response) : response;
+    final status = data is Map ? data['status'] : null;
+    return (status ?? 'pending').toString();
   }
 
   // ================== PAYMENTS ==================

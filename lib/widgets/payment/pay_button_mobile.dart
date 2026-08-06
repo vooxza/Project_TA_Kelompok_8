@@ -20,8 +20,24 @@ class PayButtonMobile extends StatelessWidget {
     final customerName = controller.selectedTable.value ?? '-';
     final total = controller.totalPrice;
 
-    final success = await controller.checkout(1);
-    if (!success) return;
+    // Order sudah dibuat sebelumnya (saat QR ditampilkan lewat
+    // startQrisPayment). Di sini kita cuma VERIFIKASI ke payment gateway
+    // apakah order tsb sudah benar-benar dibayar, bukan bikin order baru.
+    controller.isVerifyingPayment.value = true;
+    final paid = await controller.verifyQrisPaid();
+    controller.isVerifyingPayment.value = false;
+
+    if (!paid) {
+      Get.snackbar(
+        'Belum Terbayar',
+        'Pembayaran QRIS belum terverifikasi. Pastikan sudah scan & bayar, lalu coba lagi.',
+        backgroundColor: AppColors.snackbarWarning,
+        colorText: AppColors.textWhite,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(12),
+      );
+      return;
+    }
 
     // ✅ Print nota otomatis
     await ThermalPrintService.printNota(
@@ -122,52 +138,60 @@ class PayButtonMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => SizedBox(
-        width: double.infinity,
-        height: 58,
-        child: ElevatedButton(
-          onPressed: controller.isLoading.value
-              ? null
-              : () => _handlePay(context),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.success,
-            disabledBackgroundColor: AppColors.success.withOpacity(0.5),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-          child: controller.isLoading.value
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2.5,
-                  ),
-                )
-              : const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.check_circle_rounded,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    SizedBox(width: 10),
-                    Text(
-                      'Saya Sudah Bayar',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                  ],
+      () {
+        final canConfirm = controller.isQrisPaid.value &&
+            !controller.isVerifyingPayment.value;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!controller.isQrisPaid.value) ...[
+              const Text(
+                'Menunggu konfirmasi pembayaran dari QRIS...',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textLight,
+                  fontWeight: FontWeight.w600,
                 ),
-        ),
-      ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            SizedBox(
+              width: double.infinity,
+              height: 58,
+              child: ElevatedButton(
+                onPressed: canConfirm ? () => _handlePay(context) : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryRed,
+                  disabledBackgroundColor: AppColors.borderLight,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: controller.isVerifyingPayment.value
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      )
+                    : const Text(
+                        'Konfirmasi Pembayaran',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

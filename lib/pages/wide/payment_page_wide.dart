@@ -22,7 +22,10 @@ class PaymentPageWide extends GetView<CartController> {
           Row(
             children: [
               GestureDetector(
-                onTap: () => Get.back(),
+                onTap: () {
+                  controller.resetQrisPayment();
+                  Get.back();
+                },
                 child: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(

@@ -25,8 +25,24 @@ class PayButtonWide extends StatelessWidget {
     final customerName = cart.selectedTable.value ?? '-';
     final total = cart.totalPrice;
 
-    final success = await cart.checkout(0);
-    if (!success) return;
+    // Order sudah dibuat sebelumnya (saat QR ditampilkan lewat
+    // startQrisPayment). Di sini kita cuma VERIFIKASI ke payment gateway
+    // apakah order tsb sudah benar-benar dibayar, bukan bikin order baru.
+    cart.isVerifyingPayment.value = true;
+    final paid = await cart.verifyQrisPaid();
+    cart.isVerifyingPayment.value = false;
+
+    if (!paid) {
+      Get.snackbar(
+        'Belum Terbayar',
+        'Pembayaran QRIS belum terverifikasi. Pastikan sudah scan & bayar, lalu coba lagi.',
+        backgroundColor: AppColors.snackbarWarning,
+        colorText: AppColors.textWhite,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(12),
+      );
+      return;
+    }
 
     // ✅ Print nota otomatis
     await ThermalPrintService.printNota(
@@ -130,38 +146,59 @@ class PayButtonWide extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: ElevatedButton(
-          onPressed: controller.isLoading.value ? null : _onConfirm,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryRed,
-            disabledBackgroundColor: AppColors.borderLight,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-            ),
-          ),
-          child: controller.isLoading.value
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2.5,
-                  ),
-                )
-              : const Text(
-                  'Konfirmasi Pembayaran',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textWhite,
+      () {
+        final canConfirm =
+            controller.isQrisPaid.value && !controller.isVerifyingPayment.value;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!controller.isQrisPaid.value) ...[
+              const Text(
+                'Menunggu konfirmasi pembayaran dari QRIS...',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textLight,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: canConfirm ? _onConfirm : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryRed,
+                  disabledBackgroundColor: AppColors.borderLight,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
                   ),
                 ),
-        ),
-      ),
+                child: controller.isVerifyingPayment.value
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      )
+                    : const Text(
+                        'Konfirmasi Pembayaran',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textWhite,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
