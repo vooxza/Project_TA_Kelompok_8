@@ -64,8 +64,10 @@ class _PaymentCashPageState extends State<PaymentCashPage> {
     final success = await cartController.checkout(0);
     if (!success) return;
 
-    // ✅ Print nota otomatis
-    await ThermalPrintService.printNota(
+    // ✅ Dialog sukses langsung tampil, print nota jalan di background
+    // (printNota punya timeout sendiri, tidak akan menggantung UI).
+    _showSuccessDialog(change);
+    ThermalPrintService.printNota(
       invoiceNumber: DateTime.now().millisecondsSinceEpoch.toString(),
       customerName: customerName,
       items: items,
@@ -74,8 +76,6 @@ class _PaymentCashPageState extends State<PaymentCashPage> {
       change: change,
       paymentMethod: 'tunai',
     );
-
-    _showSuccessDialog(change);
   }
 
   void _showSuccessDialog(double change) {

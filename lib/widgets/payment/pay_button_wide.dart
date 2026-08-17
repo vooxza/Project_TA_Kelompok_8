@@ -44,16 +44,16 @@ class PayButtonWide extends StatelessWidget {
       return;
     }
 
-    // ✅ Print nota otomatis
-    await ThermalPrintService.printNota(
+    // ✅ Dialog sukses langsung tampil, print nota jalan di background
+    // (printNota punya timeout sendiri, tidak akan menggantung UI).
+    _showSuccessDialog();
+    ThermalPrintService.printNota(
       invoiceNumber: DateTime.now().millisecondsSinceEpoch.toString(),
       customerName: customerName,
       items: items,
       totalPrice: total,
       paymentMethod: 'qris',
     );
-
-    _showSuccessDialog();
   }
 
   void _showSuccessDialog() {

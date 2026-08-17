@@ -57,9 +57,9 @@ class QRSectionWide extends StatelessWidget {
           // QR / status pembayaran (fetch beneran dari Midtrans lewat
           // CartController.startQrisPayment(), bukan lagi icon dummy)
           QrisImageBox(controller: controller),
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
           const Divider(color: AppColors.divider),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
