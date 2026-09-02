@@ -71,9 +71,13 @@ class HistoryController extends GetxController {
   }
 
   String formatRupiah(double amount) {
-    String result = amount.toInt().toString();
+    final isWhole = amount % 1 == 0;
+    final raw = isWhole
+        ? amount.toInt().toString()
+        : amount.toStringAsFixed(2).replaceAll('.', ',');
+    final parts = raw.split(',');
     final reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    result = result.replaceAllMapped(reg, (Match m) => '${m[1]}.');
-    return 'Rp $result';
+    final intPart = parts[0].replaceAllMapped(reg, (Match m) => '${m[1]}.');
+    return 'Rp $intPart${parts.length > 1 ? ',${parts[1]}' : ''}';
   }
 }

@@ -31,9 +31,15 @@ class _PaymentCashPageState extends State<PaymentCashPage> {
 
   String _formatRupiah(double amount) => cartController.formatRupiah(amount);
 
+  String _formatPlain(int amount) {
+    final raw = amount.toString();
+    final reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+    return raw.replaceAllMapped(reg, (m) => '${m[1]}.');
+  }
+
   void _onCashChanged(String value) {
-    final cleaned = value.replaceAll('.', '').replaceAll(',', '');
-    setState(() => _cashGiven = double.tryParse(cleaned) ?? 0);
+    final normalized = value.replaceAll('.', '').replaceAll(',', '.');
+    setState(() => _cashGiven = double.tryParse(normalized) ?? 0);
   }
 
   Future<void> _onConfirm() async {
@@ -166,8 +172,9 @@ class _PaymentCashPageState extends State<PaymentCashPage> {
                 child: ElevatedButton(
                   onPressed: () {
                     cartController.clearCart();
-                    nav.goToForce(0);
+                    Get.back();
                     Get.offAllNamed(AppRoutes.main);
+                    nav.goToForce(0);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryRed,
@@ -349,9 +356,14 @@ class _PaymentCashPageState extends State<PaymentCashPage> {
                         Expanded(
                           child: TextField(
                             controller: _cashController,
-                            keyboardType: TextInputType.number,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9,]'),
+                              ),
+                              _CurrencyInputFormatter(),
                             ],
                             onChanged: _onCashChanged,
                             style: const TextStyle(
@@ -512,7 +524,7 @@ class _PaymentCashPageState extends State<PaymentCashPage> {
       onTap: () {
         setState(() {
           _cashGiven = amount;
-          _cashController.text = amount.toInt().toString();
+          _cashController.text = _formatPlain(amount.toInt());
         });
       },
       child: AnimatedContainer(
@@ -538,6 +550,53 @@ class _PaymentCashPageState extends State<PaymentCashPage> {
         ),
       ),
     );
+  }
+}
+
+class _CurrencyInputFormatter extends TextInputFormatter {
+  static const int _maxIntDigits = 8;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text;
+    if (text.isEmpty) return newValue;
+
+    final cursorFromEnd = text.length - newValue.selection.end;
+
+    final parts = text.split(',');
+    var intDigits =
+        parts[0].replaceAll('.', '').replaceAll(RegExp(r'[^0-9]'), '');
+    if (intDigits.length > _maxIntDigits) {
+      intDigits = intDigits.substring(0, _maxIntDigits);
+    }
+    final formattedInt = _addThousands(intDigits);
+
+    var formatted = formattedInt;
+    if (parts.length > 1) {
+      final decDigits =
+          parts.sublist(1).join().replaceAll(RegExp(r'[^0-9]'), '');
+      final dec =
+          decDigits.length > 2 ? decDigits.substring(0, 2) : decDigits;
+      formatted += ',$dec';
+    }
+
+    var newEnd = formatted.length - cursorFromEnd;
+    if (newEnd < 0) newEnd = 0;
+    if (newEnd > formatted.length) newEnd = formatted.length;
+
+    return newValue.copyWith(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: newEnd),
+    );
+  }
+
+  static String _addThousands(String digits) {
+    if (digits.isEmpty) return '';
+    final reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+    return digits.replaceAllMapped(reg, (m) => '${m[1]}.');
   }
 }
 

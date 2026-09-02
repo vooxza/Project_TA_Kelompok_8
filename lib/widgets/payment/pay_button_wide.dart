@@ -114,8 +114,9 @@ class PayButtonWide extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {
                       controller.clearCart();
-                      nav.goToForce(0);
+                      Get.back();
                       Get.offAllNamed(AppRoutes.main);
+                      nav.goToForce(0);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryRed,

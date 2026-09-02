@@ -57,12 +57,10 @@ class ThermalPrintService {
   // Cache hasil discover BLE (karakteristik tulis) agar tidak perlu
   // discover ulang tiap kali print — operasi discover BLE itu lambat &
   // sering bikin koneksi putus kalau diulang-ulang.
-  static Printer? _bleCacheDevice;
   static BleCharacteristic? _bleCacheWriteChar;
   static bool _bleCacheWriteWithoutResponse = false;
 
   static void _clearBleCache() {
-    _bleCacheDevice = null;
     _bleCacheWriteChar = null;
   }
 
@@ -748,30 +746,60 @@ class ThermalPrintService {
   }
 
   /// Kirim data BLE dalam potongan kecil dengan jeda antar-potongan.
-  /// Kalau koneksi putus, reconnect dulu sebelum kirim.
+  /// Kalau koneksi putus / write gagal di tengah jalan, koneksi dibersihkan
+  /// lalu seluruh kiriman dicoba ulang sekali.
   static Future<void> _sendBytesBle(Printer device, List<int> bytes) async {
     final address = device.address;
     if (address == null || address.isEmpty) {
       throw Exception('Alamat Bluetooth printer kosong');
     }
 
-    if (!await _isBleConnected(device)) {
-      final ok = await _connectBle(device);
-      if (!ok) {
-        isConnected.value = false;
-        throw Exception('Koneksi Bluetooth putus, silakan coba lagi');
-      }
-      isConnected.value = true;
-      // Printer baru saja di-reconnect, cache karakteristik tidak valid lagi.
-      if (_bleCacheDevice?.address != device.address) {
-        _bleCacheDevice = null;
-        _bleCacheWriteChar = null;
-      }
-      // Jeda singkat agar GATT benar-benar siap menerima operasi
-      // (discover/write langsung setelah connect sering bikin putus).
-      await Future.delayed(const Duration(milliseconds: 400));
-    }
+    const chunkSize = 20;
 
+    for (var attempt = 0; ; attempt++) {
+      if (!await _isBleConnected(device)) {
+        final ok = await _connectBle(device);
+        if (!ok) {
+          isConnected.value = false;
+          throw Exception('Koneksi Bluetooth putus, silakan coba lagi');
+        }
+        isConnected.value = true;
+        // GATT baru setelah reconnect → cache karakteristik dari koneksi
+        // lama (yang sudah di-close) TIDAK valid lagi. Wajib dibersihkan
+        // supaya tidak menulis ke karakteristik yang sudah mati.
+        _clearBleCache();
+        // Jeda singkat agar GATT benar-benar siap menerima operasi
+        // (discover/write langsung setelah connect sering bikin putus).
+        await Future.delayed(const Duration(milliseconds: 400));
+      }
+
+      try {
+        await _writeBleChunks(device, bytes, chunkSize);
+        return;
+      } catch (_) {
+        // Koneksi bermasalah di tengah kirim → putuskan paksa lalu coba
+        // sekali lagi. Kalau percobaan kedua juga gagal, biarkan error
+        // naik supaya muncul "Gagal Print".
+        if (attempt >= 1) rethrow;
+        _clearBleCache();
+        isConnected.value = false;
+        try {
+          await UniversalBle.disconnect(address)
+              .timeout(const Duration(seconds: 2));
+        } catch (_) {
+          // GATT tidak dikenal / sudah tertutup — abaikan.
+        }
+        await Future.delayed(const Duration(milliseconds: 300));
+      }
+    }
+  }
+
+  /// Tulis seluruh byte ke karakteristik BLE dalam potongan kecil.
+  static Future<void> _writeBleChunks(
+    Printer device,
+    List<int> bytes,
+    int chunkSize,
+  ) async {
     // Ambil karakteristik tulis (pakai cache kalau printer masih sama).
     BleCharacteristic? writeCharacteristic = _bleCacheWriteChar;
     var writeWithoutResponse = _bleCacheWriteWithoutResponse;
@@ -819,7 +847,6 @@ class ThermalPrintService {
         );
       }
 
-      _bleCacheDevice = device;
       _bleCacheWriteChar = writeCharacteristic;
       _bleCacheWriteWithoutResponse = writeWithoutResponse;
     }
@@ -828,8 +855,6 @@ class ThermalPrintService {
     // lainnya sering putus koneksi (status 22) saat diminta MTU besar.
     // Tanpa requestMtu, MTU default Android = 23 → data per write = 20 byte.
     // Sedikit lebih lambat tapi jauh lebih stabil.
-    const chunkSize = 20;
-
     for (var i = 0; i < bytes.length; i += chunkSize) {
       final end = i + chunkSize > bytes.length ? bytes.length : i + chunkSize;
 
@@ -838,13 +863,11 @@ class ThermalPrintService {
         withResponse: !writeWithoutResponse,
       );
 
-      if (writeWithoutResponse) {
-        await write;
-      } else {
-        // Write dengan response bisa menggantung kalau printer tidak
-        // membalas ACK. Batasi biar tidak bikin HP hang.
-        await write.timeout(const Duration(milliseconds: 1500));
-      }
+      // Timeout dipasang di semua write. Write dengan response bisa
+      // menggantung kalau printer tidak membalas ACK, dan write tanpa
+      // response juga bisa hang kalau printer sedang sibuk — keduanya
+      // bikin tampil "Gagal Print". Batasi agar tidak menunggu selamanya.
+      await write.timeout(const Duration(milliseconds: 3000));
 
       await Future.delayed(const Duration(milliseconds: 30));
     }
@@ -863,8 +886,13 @@ class ThermalPrintService {
   }
 
   static String _formatRupiah(double amount) {
-    final result = amount.toInt().toString();
+    final isWhole = amount % 1 == 0;
+    final raw = isWhole
+        ? amount.toInt().toString()
+        : amount.toStringAsFixed(2).replaceAll('.', ',');
+    final parts = raw.split(',');
     final reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    return 'Rp ${result.replaceAllMapped(reg, (m) => '${m[1]}.')}';
+    final intPart = parts[0].replaceAllMapped(reg, (m) => '${m[1]}.');
+    return 'Rp $intPart${parts.length > 1 ? ',${parts[1]}' : ''}';
   }
 }
