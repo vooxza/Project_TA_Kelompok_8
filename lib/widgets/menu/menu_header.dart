@@ -28,26 +28,6 @@ class MenuHeader extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Halo, $firstName!',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textLight,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                const Text(
-                  'Mau Pesan Apa?',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textDark,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ],
             ),
           ),
 

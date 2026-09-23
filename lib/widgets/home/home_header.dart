@@ -66,30 +66,6 @@ class HomeHeader extends StatelessWidget {
                   ),
                 ],
               ),
-
-              const SizedBox(height: 25),
-
-              // --- TEKS WELCOME ---
-              Text(
-                "Welcome, $name!",
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-
-              const SizedBox(height: 4),
-
-              // --- TEKS MAU PESAN APA ---
-              const Text(
-                "Mau Pesan Apa?",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
             ],
           ),
         ),

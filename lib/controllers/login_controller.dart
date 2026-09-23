@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -14,7 +15,8 @@ class LoginController extends GetxController {
   var errorMessage = ''.obs;
 
   Future<void> login() async {
-    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+    if (emailController.text.trim().isEmpty || 
+        passwordController.text.trim().isEmpty) {
       errorMessage.value = 'Email dan password wajib diisi!';
       return;
     }
@@ -24,32 +26,75 @@ class LoginController extends GetxController {
       errorMessage.value = '';
 
       final response = await apiService.login(
-        emailController.text,
-        passwordController.text,
+        emailController.text.trim(),
+        passwordController.text.trim(),
       );
 
-      final token = response['access_token'];
       final user = response['user'];
+      final bool isActive = user['is_active'] ?? true;
 
+      // Proteksi tambahan jika akun nonaktif
+      if (!isActive) {
+        const inactiveMsg = 'Akun Anda telah dinonaktifkan. Silakan hubungi admin.';
+        errorMessage.value = inactiveMsg;
+        _showErrorSnackbar(inactiveMsg);
+        return;
+      }
+
+      final token = response['access_token'] ?? response['token'];
+
+      // Simpan credential ke GetStorage
       box.write('token', token);
       box.write('user', user);
       box.write('name', user['name']);
       box.write('email', user['email']);
       box.write('role', user['role']);
 
-      final role = user['role'] as String;
-      if (role == 'admin') {
-        Get.offAllNamed(AppRoutes.main);
-      } else {
-        Get.offAllNamed(AppRoutes.main);
-      }
+      Get.offAllNamed(AppRoutes.main);
 
     } catch (e) {
-      errorMessage.value = 'Email dan password tidak valid!';
-      return;
+      final cleanMsg = _parseErrorMessage(e.toString());
+      errorMessage.value = cleanMsg;
+      _showErrorSnackbar(cleanMsg);
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // Helper untuk mengekstrak pesan 'message' asli dari response backend
+  String _parseErrorMessage(String rawError) {
+    if (rawError.contains('{"message":')) {
+      try {
+        final startIndex = rawError.indexOf('{"message":');
+        final jsonStr = rawError.substring(startIndex);
+        final decoded = jsonDecode(jsonStr);
+        if (decoded is Map && decoded.containsKey('message')) {
+          return decoded['message'].toString();
+        }
+      } catch (_) {}
+    }
+
+    // Fallback jika berupa string teks biasa/HTTP Exception
+    String clean = rawError.replaceAll(
+      RegExp(r'Exception:|Error:|Failed to post data:|\d{3}\s*-'), 
+      ''
+    ).trim();
+
+    return clean.isNotEmpty ? clean : 'Gagal terhubung ke server.';
+  }
+
+  void _showErrorSnackbar(String message) {
+    Get.snackbar(
+      'Akses Ditolak',
+      message,
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: Colors.redAccent,
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(12),
+      borderRadius: 10,
+      duration: const Duration(seconds: 4),
+      icon: const Icon(Icons.block, color: Colors.white),
+    );
   }
 
   @override

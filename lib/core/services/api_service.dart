@@ -7,6 +7,7 @@ import 'package:project_ta_kelompok_8/models/category_model.dart'
 import 'package:project_ta_kelompok_8/models/product_model.dart';
 import 'package:project_ta_kelompok_8/models/order_model.dart';
 import 'package:project_ta_kelompok_8/models/payment_model.dart';
+import 'package:project_ta_kelompok_8/models/user_model.dart';
 
 class ApiService {
   static const String baseUrl =
@@ -34,6 +35,7 @@ class ApiService {
           .timeout(Duration(seconds: timeout));
 
       if (response.statusCode == 200) {
+        if (response.body.isEmpty) return null;
         return jsonDecode(response.body);
       } else if (response.statusCode == 404) {
         throw Exception('Resource not found');
@@ -61,6 +63,7 @@ class ApiService {
           .timeout(Duration(seconds: timeout));
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        if (response.body.isEmpty) return null;
         return jsonDecode(response.body);
       } else {
         throw Exception(
@@ -87,6 +90,7 @@ class ApiService {
           .timeout(Duration(seconds: timeout));
 
       if (response.statusCode == 200) {
+        if (response.body.isEmpty) return null;
         return jsonDecode(response.body);
       } else {
         throw Exception(
@@ -245,6 +249,7 @@ class ApiService {
       var res = await http.Response.fromStream(response);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        if (res.body.isEmpty) throw Exception('Response kosong dari server');
         return Product.fromJson(jsonDecode(res.body));
       } else {
         throw Exception('Upload gagal: ${res.body}');
@@ -314,6 +319,7 @@ class ApiService {
       var res = await http.Response.fromStream(response);
 
       if (response.statusCode == 200) {
+        if (res.body.isEmpty) throw Exception('Response kosong dari server');
         return Product.fromJson(jsonDecode(res.body));
       } else {
         throw Exception('Update gagal: ${response.statusCode}');

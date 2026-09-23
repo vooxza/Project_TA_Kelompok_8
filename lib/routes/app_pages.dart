@@ -11,6 +11,7 @@ import 'package:project_ta_kelompok_8/pages/payment_page.dart';
 import 'package:project_ta_kelompok_8/pages/payment_cash_page.dart';
 import 'package:project_ta_kelompok_8/pages/product_detail.dart';
 import 'package:project_ta_kelompok_8/pages/profile_page.dart';
+import 'package:project_ta_kelompok_8/pages/cashier_page.dart';
 import 'package:project_ta_kelompok_8/pages/splashscreen.dart';
 import 'package:project_ta_kelompok_8/pages/startingscreen.dart';
 import 'package:project_ta_kelompok_8/routes/app_routes.dart';
@@ -23,6 +24,7 @@ import '../bindings/add_menu_binding.dart';
 import '../bindings/cart_binding.dart';
 import '../bindings/splashscreen_binding.dart';
 import '../bindings/startingscreen_binding.dart';
+import '../bindings/cashier_binding.dart';
 
 class AppPages {
   static final pages = [
@@ -99,6 +101,12 @@ class AppPages {
     GetPage(
       name: AppRoutes.productDetail,
       page: () => ProductDetailPage(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.cashierManagement,
+      page: () => CashierPage(),
+      binding: CashierBinding(),
       transition: Transition.rightToLeft,
     ),
   ];
