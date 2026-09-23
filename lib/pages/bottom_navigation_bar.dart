@@ -1,1 +1,1 @@
-export '../widgets/bottom_nav_bar.dart';
+export '../widgets/navigation/bottom_nav_bar.dart';

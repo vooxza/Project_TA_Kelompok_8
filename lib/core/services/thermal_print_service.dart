@@ -22,6 +22,13 @@ import 'package:win32/win32.dart';
 ///
 /// Pilihan printer terakhir disimpan otomatis sehingga saat print nota
 /// berikutnya service ini akan mencoba reconnect dengan sendirinya.
+///
+/// Catatan penting BLE:
+/// - Koneksi & pengiriman data BLE ditangani langsung via UniversalBle
+///   (di-export oleh plugin), TIDAK lewat `FlutterThermalPrinter.printData`
+///   karena method bawaan plugin hanya mencari properti `write` dan tidak
+///   pernah mencetak untuk printer yang hanya mendukung Write Without Response.
+/// - Print diberi batas waktu (timeout) supaya tidak pernah menggantung UI.
 class ThermalPrintService {
   static final FlutterThermalPrinter _printer = FlutterThermalPrinter.instance;
 
@@ -46,6 +53,16 @@ class ThermalPrintService {
   static StreamSubscription<List<Printer>>? _scanSub;
 
   static bool _loaded = false;
+
+  // Cache hasil discover BLE (karakteristik tulis) agar tidak perlu
+  // discover ulang tiap kali print — operasi discover BLE itu lambat &
+  // sering bikin koneksi putus kalau diulang-ulang.
+  static BleCharacteristic? _bleCacheWriteChar;
+  static bool _bleCacheWriteWithoutResponse = false;
+
+  static void _clearBleCache() {
+    _bleCacheWriteChar = null;
+  }
 
   static String get connectionName {
     if (_connectedDevice?.name != null) return _connectedDevice!.name!;
@@ -103,7 +120,7 @@ class ThermalPrintService {
         return;
       }
       if (_connectedDevice != null) {
-        final ok = await PrinterManager.instance.isConnected(_connectedDevice!);
+        final ok = await _isDeviceConnected(_connectedDevice!);
         if (ok) {
           isConnected.value = true;
           return;
@@ -189,6 +206,7 @@ class ThermalPrintService {
 
   /// Connect ke printer USB / Bluetooth yang dipilih.
   static Future<bool> connectDevice(Printer device) async {
+    _clearBleCache();
     try {
       if (device.connectionType == ConnectionType.USB) {
         // Pada Android, connect() akan memicu popup izin USB
@@ -196,7 +214,7 @@ class ThermalPrintService {
         await Future.delayed(const Duration(milliseconds: 400));
         isConnected.value = await PrinterManager.instance.isConnected(device);
       } else if (device.connectionType == ConnectionType.BLE) {
-        isConnected.value = await _printer.connect(device);
+        isConnected.value = await _connectBle(device);
       } else {
         isConnected.value = false;
       }
@@ -215,8 +233,99 @@ class ThermalPrintService {
     }
   }
 
+  /// Connect BLE langsung via UniversalBle.
+  ///
+  /// Tidak memakai `_printer.connect()` dari plugin karena method itu
+  /// menunggu 10 detik secara hardcode (penyebab aplikasi terasa lemot).
+  static Future<bool> _connectBle(Printer device) async {
+    try {
+      final address = device.address;
+      if (address == null || address.isEmpty) return false;
+
+      // Sudah terhubung → langsung sukses.
+      if (await _isBleConnected(device)) return true;
+
+      // Sedang proses koneksi → TUNGGU, jangan connect ulang.
+      // Connect ulang saat state masih "connecting" bikin Android
+      // membatalkan koneksi yang sedang berjalan → log
+      // "Connection Terminated By Local Host" (status 22) → printer putus.
+      for (var i = 0; i < 10; i++) {
+        final state = await _getBleState(device);
+        if (state == BleConnectionState.connected) return true;
+        if (state == BleConnectionState.connecting) {
+          await Future.delayed(const Duration(milliseconds: 300));
+          continue;
+        }
+        break;
+      }
+      if (await _isBleConnected(device)) return true;
+
+      // Bersihkan dulu GATT lama yang mungkin masih nyangkut (belum
+      // di-close oleh plugin setelah koneksi sempat putus). Kalau tidak
+      // dibersihkan, connectGatt yang baru akan MEMBATALKAN koneksi lama
+      // → Android mengirim status 22 "Connection Terminated By Local Host"
+      // (log cancelOpen() + unregisterApp() + close()).
+      try {
+        await UniversalBle.disconnect(address)
+            .timeout(const Duration(seconds: 2));
+      } catch (_) {
+        // GATT tidak dikenal / sudah tertutup — abaikan.
+      }
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      await UniversalBle.connect(address);
+
+      // Tunggu sampai koneksi benar-benar stabil, maksimal ~4 detik.
+      for (var i = 0; i < 10; i++) {
+        await Future.delayed(const Duration(milliseconds: 400));
+        if (await _isBleConnected(device)) return true;
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Ambil state koneksi BLE terkini.
+  static Future<BleConnectionState> _getBleState(Printer device) async {
+    try {
+      final address = device.address;
+      if (address == null || address.isEmpty) {
+        return BleConnectionState.disconnected;
+      }
+      return await UniversalBle.getConnectionState(address);
+    } catch (_) {
+      return BleConnectionState.disconnected;
+    }
+  }
+
+  /// Cek koneksi BLE yang SEBENARNYA (bukan flag stale dari hasil scan).
+  static Future<bool> _isBleConnected(Printer device) async {
+    try {
+      final address = device.address;
+      if (address == null || address.isEmpty) return false;
+      final state = await UniversalBle.getConnectionState(address);
+      return state == BleConnectionState.connected;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Cek koneksi device sesuai jenis koneksinya.
+  static Future<bool> _isDeviceConnected(Printer device) async {
+    try {
+      if (device.connectionType == ConnectionType.BLE) {
+        return _isBleConnected(device);
+      }
+      return await PrinterManager.instance.isConnected(device);
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Connect ke printer jaringan (ESC/POS over TCP, default port 9100).
   static Future<bool> connectNetwork(String host, int port) async {
+    _clearBleCache();
     try {
       final net = FlutterThermalPrinterNetwork(
         host,
@@ -246,6 +355,7 @@ class ThermalPrintService {
 
   /// Putus koneksi printer aktif.
   static Future<void> disconnectPrinter() async {
+    _clearBleCache();
     try {
       if (_connectedDevice != null) {
         await _printer.disconnect(_connectedDevice!);
@@ -369,25 +479,33 @@ class ThermalPrintService {
         isConnected.value = true;
         return true;
       }
+      isConnected.value = false;
+      return false;
     }
 
     // Device USB / BLE yang sudah aktif
     if (_connectedDevice != null) {
-      final ok = await PrinterManager.instance.isConnected(_connectedDevice!);
-      if (ok) {
+      if (await _isDeviceConnected(_connectedDevice!)) {
         isConnected.value = true;
         return true;
       }
+      isConnected.value = false;
     }
 
     // Reconnect printer terakhir
     if (await _restoreSavedConnection()) return true;
 
-    // Terakhir: coba auto-detect
-    return _autoDetectAndConnect();
+    // JANGAN auto-scan di sini: scan BLE saat print bikin HP lemot
+    // dan malah mengganggu koneksi printer yang sedang aktif.
+    isConnected.value = false;
+    return false;
   }
 
   /// Print nota pesanan ke printer yang aktif.
+  ///
+  /// Aman dipanggil dari mana saja: method ini punya batas waktu (timeout)
+  /// sehingga TIDAK akan menggantung UI pembayaran walau printer BLE
+  /// bermasalah. Setiap kegagalan selalu ditampilkan lewat snackbar.
   static Future<void> printNota({
     required String invoiceNumber,
     required String customerName,
@@ -398,7 +516,42 @@ class ThermalPrintService {
     required String paymentMethod,
   }) async {
     try {
+      await _printNotaInternal(
+        invoiceNumber: invoiceNumber,
+        customerName: customerName,
+        items: items,
+        totalPrice: totalPrice,
+        cashGiven: cashGiven,
+        change: change,
+        paymentMethod: paymentMethod,
+      ).timeout(const Duration(seconds: 12));
+    } on TimeoutException {
+      _showSnackbar(
+        'Gagal Print',
+        'Printer tidak merespons, cek koneksi printer',
+        isError: true,
+      );
+    } catch (e) {
+      _showSnackbar(
+        'Gagal Print',
+        'Error: $e',
+        isError: true,
+      );
+    }
+  }
+
+  static Future<void> _printNotaInternal({
+    required String invoiceNumber,
+    required String customerName,
+    required List<Map<String, dynamic>> items,
+    required double totalPrice,
+    double? cashGiven,
+    double? change,
+    required String paymentMethod,
+  }) async {
+    try {
       final connected = await _ensureConnected();
+
       if (!connected) {
         _showSnackbar(
           'Printer Tidak Terhubung',
@@ -409,118 +562,168 @@ class ThermalPrintService {
       }
 
       final now = DateTime.now();
+
       const months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-        'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'Mei',
+        'Jun',
+        'Jul',
+        'Agu',
+        'Sep',
+        'Okt',
+        'Nov',
+        'Des',
       ];
+
       final dateStr =
           '${now.day} ${months[now.month - 1]} ${now.year} '
           '${now.hour.toString().padLeft(2, '0')}:'
           '${now.minute.toString().padLeft(2, '0')}';
 
       final profile = await CapabilityProfile.load();
-      // Ganti PaperSize.mm58 jika kertas printer kamu 58mm
-      final generator = Generator(PaperSize.mm80, profile);
+
+      // MP58 = 58 mm
+      final generator = Generator(PaperSize.mm58, profile);
 
       List<int> bytes = [];
 
+      String formatLine(String left, String right) {
+        const totalWidth = 32;
+
+        final spaces = totalWidth - left.length - right.length;
+
+        if (spaces <= 0) {
+          return '$left $right';
+        }
+
+        return left + (' ' * spaces) + right;
+      }
+
       bytes += generator.text(
         'WARUNG SOTO MBOK KERSO',
-        styles: const PosStyles(align: PosAlign.center, bold: true),
-      );
-      bytes += generator.text(
-        'Jl. Contoh No. 1, Semarang',
-        styles: const PosStyles(align: PosAlign.center),
-      );
-      bytes += generator.text(
-        '--------------------------------',
-        styles: const PosStyles(align: PosAlign.center),
+        styles: const PosStyles(
+          align: PosAlign.center,
+          bold: true,
+        ),
       );
 
-      bytes += generator.row([
-        PosColumn(text: 'Invoice', width: 4, styles: const PosStyles(bold: true)),
-        PosColumn(text: invoiceNumber, width: 8, styles: const PosStyles(align: PosAlign.right)),
-      ]);
-      bytes += generator.row([
-        PosColumn(text: 'Pemesan', width: 4, styles: const PosStyles(bold: true)),
-        PosColumn(text: customerName, width: 8, styles: const PosStyles(align: PosAlign.right)),
-      ]);
-      bytes += generator.row([
-        PosColumn(text: 'Tanggal', width: 4),
-        PosColumn(text: dateStr, width: 8, styles: const PosStyles(align: PosAlign.right)),
-      ]);
+      bytes += generator.hr();
+
       bytes += generator.text(
-        '--------------------------------',
-        styles: const PosStyles(align: PosAlign.center),
+        formatLine('Invoice', invoiceNumber),
+        styles: const PosStyles(
+          bold: true,
+        ),
       );
+
+      bytes += generator.text(
+        formatLine('Pemesan', customerName),
+      );
+
+      bytes += generator.text(
+        formatLine('Tanggal', dateStr),
+      );
+
+      bytes += generator.hr();
 
       for (final item in items) {
         final name = item['name'].toString();
         final qty = item['quantity'] as int;
         final price = item['price'] as double;
-        final subtotal = _formatRupiah(price * qty);
 
-        bytes += generator.text('$qty x $name');
-        bytes += generator.row([
-          PosColumn(text: '  @${_formatRupiah(price)}', width: 6),
-          PosColumn(text: subtotal, width: 6, styles: const PosStyles(align: PosAlign.right)),
-        ]);
+        bytes += generator.text(
+          '$qty x $name',
+        );
+
+        bytes += generator.text(
+          formatLine(
+            '@${_formatRupiah(price)}',
+            _formatRupiah(price * qty),
+          ),
+        );
       }
 
+      bytes += generator.hr();
+
       bytes += generator.text(
-        '--------------------------------',
-        styles: const PosStyles(align: PosAlign.center),
-      );
-      bytes += generator.row([
-        PosColumn(text: 'TOTAL', width: 4, styles: const PosStyles(bold: true)),
-        PosColumn(
-          text: _formatRupiah(totalPrice),
-          width: 8,
-          styles: const PosStyles(align: PosAlign.right, bold: true),
+        formatLine(
+          'TOTAL',
+          _formatRupiah(totalPrice),
         ),
-      ]);
+        styles: const PosStyles(
+          bold: true,
+        ),
+      );
 
-      if (paymentMethod == 'tunai' && cashGiven != null && change != null) {
-        bytes += generator.row([
-          PosColumn(text: 'Bayar', width: 4),
-          PosColumn(text: _formatRupiah(cashGiven), width: 8, styles: const PosStyles(align: PosAlign.right)),
-        ]);
-        bytes += generator.row([
-          PosColumn(text: 'Kembali', width: 4),
-          PosColumn(text: _formatRupiah(change), width: 8, styles: const PosStyles(align: PosAlign.right)),
-        ]);
+      if (paymentMethod == 'tunai' &&
+          cashGiven != null &&
+          change != null) {
+        bytes += generator.text(
+          formatLine(
+            'Bayar',
+            _formatRupiah(cashGiven),
+          ),
+        );
+
+        bytes += generator.text(
+          formatLine(
+            'Kembali',
+            _formatRupiah(change),
+          ),
+        );
       }
 
-      bytes += generator.text(
-        '--------------------------------',
-        styles: const PosStyles(align: PosAlign.center),
-      );
+      bytes += generator.hr();
+
       bytes += generator.text(
         'Pembayaran: ${paymentMethod.toUpperCase()}',
-        styles: const PosStyles(align: PosAlign.center),
+        styles: const PosStyles(
+          align: PosAlign.center,
+        ),
       );
+
       bytes += generator.emptyLines(1);
+
       bytes += generator.text(
         'Terima kasih sudah makan',
-        styles: const PosStyles(align: PosAlign.center),
+        styles: const PosStyles(
+          align: PosAlign.center,
+        ),
       );
+
       bytes += generator.text(
         'di Warung Soto Mbok Kerso!',
-        styles: const PosStyles(align: PosAlign.center),
+        styles: const PosStyles(
+          align: PosAlign.center,
+        ),
       );
-      bytes += generator.emptyLines(3);
-      bytes += generator.cut();
+
+      // Catatan: generator.cut() menyisipkan 5 baris kosong otomatis yang
+      // bikin gap kegedean. Jadi dipakai potong manual: feed 1 baris +
+      // GS V 0 (full cut) supaya rapat dengan teks terakhir.
+      bytes += generator.emptyLines(1);
+      bytes += [0x1D, 0x56, 0x30]; // GS V 0 → full cut
 
       await _sendBytes(bytes);
     } catch (e) {
-      _showSnackbar('Gagal Print', 'Error: $e', isError: true);
+      _showSnackbar(
+        'Gagal Print',
+        'Error: $e',
+        isError: true,
+      );
     }
   }
 
   /// Kirim data ESC/POS sesuai jenis koneksi yang aktif.
   static Future<void> _sendBytes(List<int> bytes) async {
     if (_networkHost != null && _networkHost!.isNotEmpty) {
-      final net = FlutterThermalPrinterNetwork(_networkHost!, port: _networkPort);
+      final net = FlutterThermalPrinterNetwork(
+        _networkHost!,
+        port: _networkPort,
+      );
       final result = await net.printTicket(bytes);
       if (result != NetworkPrintResult.success) {
         throw Exception(result.msg);
@@ -531,7 +734,143 @@ class ThermalPrintService {
     if (_connectedDevice == null) {
       throw Exception('Printer belum dipilih');
     }
+
+    // BLE dikirim manual (per-chunk + jeda) supaya buffer printer tidak
+    // penuh sehingga printer tidak reset/putus koneksi saat print nota.
+    if (_connectedDevice!.connectionType == ConnectionType.BLE) {
+      await _sendBytesBle(_connectedDevice!, bytes);
+      return;
+    }
+
     await _printer.printData(_connectedDevice!, Uint8List.fromList(bytes));
+  }
+
+  /// Kirim data BLE dalam potongan kecil dengan jeda antar-potongan.
+  /// Kalau koneksi putus / write gagal di tengah jalan, koneksi dibersihkan
+  /// lalu seluruh kiriman dicoba ulang sekali.
+  static Future<void> _sendBytesBle(Printer device, List<int> bytes) async {
+    final address = device.address;
+    if (address == null || address.isEmpty) {
+      throw Exception('Alamat Bluetooth printer kosong');
+    }
+
+    const chunkSize = 20;
+
+    for (var attempt = 0; ; attempt++) {
+      if (!await _isBleConnected(device)) {
+        final ok = await _connectBle(device);
+        if (!ok) {
+          isConnected.value = false;
+          throw Exception('Koneksi Bluetooth putus, silakan coba lagi');
+        }
+        isConnected.value = true;
+        // GATT baru setelah reconnect → cache karakteristik dari koneksi
+        // lama (yang sudah di-close) TIDAK valid lagi. Wajib dibersihkan
+        // supaya tidak menulis ke karakteristik yang sudah mati.
+        _clearBleCache();
+        // Jeda singkat agar GATT benar-benar siap menerima operasi
+        // (discover/write langsung setelah connect sering bikin putus).
+        await Future.delayed(const Duration(milliseconds: 400));
+      }
+
+      try {
+        await _writeBleChunks(device, bytes, chunkSize);
+        return;
+      } catch (_) {
+        // Koneksi bermasalah di tengah kirim → putuskan paksa lalu coba
+        // sekali lagi. Kalau percobaan kedua juga gagal, biarkan error
+        // naik supaya muncul "Gagal Print".
+        if (attempt >= 1) rethrow;
+        _clearBleCache();
+        isConnected.value = false;
+        try {
+          await UniversalBle.disconnect(address)
+              .timeout(const Duration(seconds: 2));
+        } catch (_) {
+          // GATT tidak dikenal / sudah tertutup — abaikan.
+        }
+        await Future.delayed(const Duration(milliseconds: 300));
+      }
+    }
+  }
+
+  /// Tulis seluruh byte ke karakteristik BLE dalam potongan kecil.
+  static Future<void> _writeBleChunks(
+    Printer device,
+    List<int> bytes,
+    int chunkSize,
+  ) async {
+    // Ambil karakteristik tulis (pakai cache kalau printer masih sama).
+    BleCharacteristic? writeCharacteristic = _bleCacheWriteChar;
+    var writeWithoutResponse = _bleCacheWriteWithoutResponse;
+
+    if (writeCharacteristic == null) {
+      final services = await device.discoverServices();
+
+      // Prioritas 1: Write Without Response. Printer thermal BLE murah
+      // (MP58 dll) hampir selalu hanya andalkan ini. Kalau dipaksa write
+      // dengan response, printer tidak mengirim ACK → write menggantung
+      // → timeout & koneksi diputus Android.
+      for (final service in services) {
+        for (final characteristic in service.characteristics) {
+          if (characteristic.properties.contains(
+            CharacteristicProperty.writeWithoutResponse,
+          )) {
+            writeCharacteristic = characteristic;
+            writeWithoutResponse = true;
+            break;
+          }
+        }
+        if (writeCharacteristic != null) break;
+      }
+
+      // Prioritas 2: fallback ke write biasa kalau tidak ada W-W-R.
+      if (writeCharacteristic == null) {
+        for (final service in services) {
+          for (final characteristic in service.characteristics) {
+            if (characteristic.properties.contains(
+              CharacteristicProperty.write,
+            )) {
+              writeCharacteristic = characteristic;
+              break;
+            }
+          }
+          if (writeCharacteristic != null) break;
+        }
+      }
+
+      if (writeCharacteristic == null) {
+        throw Exception(
+          'Karakteristik tulis tidak ditemukan. '
+          'Printer ini kemungkinan bukan Bluetooth BLE (ESC/POS). '
+          'Coba gunakan koneksi USB / WiFi.',
+        );
+      }
+
+      _bleCacheWriteChar = writeCharacteristic;
+      _bleCacheWriteWithoutResponse = writeWithoutResponse;
+    }
+
+    // Ukuran chunk aman: TANPA negosiasi MTU. RPP02N & printer BLE murah
+    // lainnya sering putus koneksi (status 22) saat diminta MTU besar.
+    // Tanpa requestMtu, MTU default Android = 23 → data per write = 20 byte.
+    // Sedikit lebih lambat tapi jauh lebih stabil.
+    for (var i = 0; i < bytes.length; i += chunkSize) {
+      final end = i + chunkSize > bytes.length ? bytes.length : i + chunkSize;
+
+      final write = writeCharacteristic.write(
+        Uint8List.fromList(bytes.sublist(i, end)),
+        withResponse: !writeWithoutResponse,
+      );
+
+      // Timeout dipasang di semua write. Write dengan response bisa
+      // menggantung kalau printer tidak membalas ACK, dan write tanpa
+      // response juga bisa hang kalau printer sedang sibuk — keduanya
+      // bikin tampil "Gagal Print". Batasi agar tidak menunggu selamanya.
+      await write.timeout(const Duration(milliseconds: 3000));
+
+      await Future.delayed(const Duration(milliseconds: 30));
+    }
   }
 
   static void _showSnackbar(String title, String message, {bool isError = false}) {
@@ -547,8 +886,13 @@ class ThermalPrintService {
   }
 
   static String _formatRupiah(double amount) {
-    final result = amount.toInt().toString();
+    final isWhole = amount % 1 == 0;
+    final raw = isWhole
+        ? amount.toInt().toString()
+        : amount.toStringAsFixed(2).replaceAll('.', ',');
+    final parts = raw.split(',');
     final reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    return 'Rp ${result.replaceAllMapped(reg, (m) => '${m[1]}.')}';
+    final intPart = parts[0].replaceAllMapped(reg, (m) => '${m[1]}.');
+    return 'Rp $intPart${parts.length > 1 ? ',${parts[1]}' : ''}';
   }
 }

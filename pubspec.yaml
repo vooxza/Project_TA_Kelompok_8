@@ -50,6 +50,7 @@ dependencies:
   flutter_thermal_printer: ^1.2.4
   esc_pos_utils_plus: ^2.0.4
   win32: ^5.15.0
+  url_launcher: ^6.3.2
   
 
 dev_dependencies:
@@ -75,6 +76,7 @@ flutter:
     - assets/images/gorengan.jpg
     - assets/images/soto_ayam.jpg
     - assets/images/tahu_goreng.jpg
+    - assets/images/qris_soto.jpeg
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

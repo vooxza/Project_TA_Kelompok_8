@@ -22,7 +22,10 @@ class PaymentPageWide extends GetView<CartController> {
           Row(
             children: [
               GestureDetector(
-                onTap: () => Get.back(),
+                onTap: () {
+                  controller.resetQrisPayment();
+                  Get.back();
+                },
                 child: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
@@ -80,7 +83,13 @@ class PaymentPageWide extends GetView<CartController> {
 
                 // Kanan: QR section
                 Expanded(
-                  child: QRSectionWide(controller: controller),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    // Bungkus pakai Align supaya kartu QRIS nggak stretch
+                    // penuh ke bawah (yang bikin ruang kosong di bawah teks
+                    // Total) — kartu menyesuaikan tinggi isinya.
+                    child: QRSectionWide(controller: controller),
+                  ),
                 ),
               ],
             ),
