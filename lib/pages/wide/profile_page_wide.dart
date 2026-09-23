@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/profile_controller.dart';
+import '../../core/services/role_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../widgets/common/wide_page_container.dart';
 import '../../widgets/profile/info_row_wide.dart';
 import '../../widgets/profile/profile_identity_panel_wide.dart';
+import '../../routes/app_routes.dart';
 
 /// Versi widescreen dari ProfilePage. Fitur & data sama persis dengan versi
 /// mobile (nama, email, status akun, tombol keluar) — didesain ulang jadi
@@ -75,6 +77,40 @@ class ProfilePageWide extends GetView<ProfileController> {
                         valueColor: AppColors.success,
                       ),
                       const SizedBox(height: 36),
+                      if (RoleService.isAdmin) ...[
+                        SizedBox(
+                          width: double.infinity,
+                          height: 54,
+                          child: ElevatedButton(
+                            onPressed: () =>
+                                Get.toNamed(AppRoutes.cashierManagement),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryRed,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.people_rounded,
+                                    color: Colors.white, size: 20),
+                                SizedBox(width: 10),
+                                Text(
+                                  'Manajemen Kasir',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                       SizedBox(
                         width: double.infinity,
                         height: 54,

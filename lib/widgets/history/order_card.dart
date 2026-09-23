@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../controllers/history_controller.dart';
+import '../../core/services/role_service.dart';
+import '../../core/services/thermal_print_service.dart';
 import '../../core/theme/app_colors.dart';
 
 class OrderCard extends StatelessWidget {
@@ -18,6 +21,8 @@ class OrderCard extends StatelessWidget {
     final String invoice = order['order_number'] ?? '-';
     final String table = order['table_number'] ?? '-';
     final String date = _formatDate(order['created_at']);
+    final int? userId = order['user_id'];
+    final bool showSource = RoleService.isAdmin;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -102,6 +107,27 @@ class OrderCard extends StatelessWidget {
             ),
           ),
 
+          // Source badge (admin only)
+          if (showSource)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              child: Row(
+                children: [
+                  Icon(Icons.badge_outlined,
+                      size: 14, color: AppColors.textLight),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Oleh: ${controller.getUserName(userId)}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textLight,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
           // Items
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -184,7 +210,7 @@ class OrderCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     const Icon(Icons.access_time_rounded,
@@ -197,6 +223,35 @@ class OrderCard extends StatelessWidget {
                         color: AppColors.textLight,
                       ),
                     ),
+                    const Spacer(),
+                    // Reprint button
+                    GestureDetector(
+                      onTap: () => _reprintReceipt(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryRed.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.print_rounded,
+                                size: 14, color: AppColors.primaryRed),
+                            SizedBox(width: 4),
+                            Text(
+                              'Cetak Ulang',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryRed,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -204,6 +259,42 @@ class OrderCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _reprintReceipt(BuildContext context) {
+    final List items = order['items'] ?? [];
+    final String invoice = order['order_number'] ?? '-';
+    final String table = order['table_number'] ?? '-';
+    final double totalPrice =
+        double.tryParse(order['total_price'].toString()) ?? 0.0;
+    final String? paymentMethod = order['payment_method'];
+
+    final printItems = items.map<Map<String, dynamic>>((item) {
+      return {
+        'name': item['product_name'] ?? '-',
+        'quantity': item['quantity'] as int,
+        'price': double.tryParse(item['price'].toString()) ?? 0.0,
+      };
+    }).toList();
+
+    ThermalPrintService.printNota(
+      invoiceNumber: invoice,
+      customerName: table,
+      items: printItems,
+      totalPrice: totalPrice,
+      paymentMethod: paymentMethod ?? 'tunai',
+    );
+
+    Get.snackbar(
+      'Mencetak',
+      'Struk sedang dicetak...',
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: AppColors.success,
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(12),
+      borderRadius: 12,
+      duration: const Duration(seconds: 2),
     );
   }
 

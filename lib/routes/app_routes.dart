@@ -12,4 +12,5 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String history = '/history';
   static const String productDetail = '/product-detail';
+  static const String cashierManagement = '/cashier-management'; // Manajemen Kasir
 }

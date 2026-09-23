@@ -13,6 +13,9 @@ class HistoryController extends GetxController {
   var totalRevenue = 0.0.obs;
   final box = GetStorage();
 
+  /// Map user_id -> nama user untuk menampilkan sumber transaksi
+  var userMap = <int, String>{}.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -20,6 +23,45 @@ class HistoryController extends GetxController {
   }
 
   bool get isAdmin => box.read('role') == 'admin';
+
+  /// Current user id — kasir hanya lihat miliknya sendiri
+  int get currentUserId => box.read('user')?['id'] ?? 0;
+
+  Future<void> _fetchUserNames() async {
+    try {
+      String? token = box.read('token');
+      final response = await http.get(
+        Uri.parse('${ApiService.baseUrl}/users'),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        if (response.body.isEmpty) return;
+        final data = json.decode(response.body);
+        final List users = data is List ? data : (data['data'] ?? []);
+        final map = <int, String>{};
+        for (final u in users) {
+          final id = u['id'];
+          final name = u['name'];
+          if (id != null && name != null) {
+            map[id] = name;
+          }
+        }
+        userMap.value = map;
+      }
+    } catch (_) {
+      // abaikan — jika gagal, nama user tidak akan tampil
+    }
+  }
+
+  /// Dapatkan nama user berdasarkan user_id
+  String getUserName(int? userId) {
+    if (userId == null) return 'Admin';
+    return userMap[userId] ?? 'Kasir #$userId';
+  }
 
   Future<void> fetchOrders() async {
     try {
@@ -36,6 +78,10 @@ class HistoryController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        if (response.body.isEmpty) {
+          orderList.value = [];
+          return;
+        }
         final data = json.decode(response.body);
         if (data['data'] != null && data['data'] is List) {
           orderList.value = data['data'];
@@ -53,8 +99,14 @@ class HistoryController extends GetxController {
     } finally {
       isLoading(false);
     }
+
+    // Ambil daftar user untuk mapping nama (berguna untuk admin)
+    if (isAdmin) {
+      await _fetchUserNames();
+    }
   }
 
+  @override
   Future<void> refresh() async {
     selectedTable.value = null;
     selectedDate.value = null;

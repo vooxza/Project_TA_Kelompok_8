@@ -7,6 +7,7 @@ import 'package:project_ta_kelompok_8/models/category_model.dart'
 import 'package:project_ta_kelompok_8/models/product_model.dart';
 import 'package:project_ta_kelompok_8/models/order_model.dart';
 import 'package:project_ta_kelompok_8/models/payment_model.dart';
+import 'package:project_ta_kelompok_8/models/user_model.dart';
 
 class ApiService {
   static const String baseUrl =
@@ -34,6 +35,7 @@ class ApiService {
           .timeout(Duration(seconds: timeout));
 
       if (response.statusCode == 200) {
+        if (response.body.isEmpty) return null;
         return jsonDecode(response.body);
       } else if (response.statusCode == 404) {
         throw Exception('Resource not found');
@@ -61,6 +63,7 @@ class ApiService {
           .timeout(Duration(seconds: timeout));
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        if (response.body.isEmpty) return null;
         return jsonDecode(response.body);
       } else {
         throw Exception(
@@ -87,6 +90,7 @@ class ApiService {
           .timeout(Duration(seconds: timeout));
 
       if (response.statusCode == 200) {
+        if (response.body.isEmpty) return null;
         return jsonDecode(response.body);
       } else {
         throw Exception(
@@ -245,6 +249,7 @@ class ApiService {
       var res = await http.Response.fromStream(response);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        if (res.body.isEmpty) throw Exception('Response kosong dari server');
         return Product.fromJson(jsonDecode(res.body));
       } else {
         throw Exception('Upload gagal: ${res.body}');
@@ -314,6 +319,7 @@ class ApiService {
       var res = await http.Response.fromStream(response);
 
       if (response.statusCode == 200) {
+        if (res.body.isEmpty) throw Exception('Response kosong dari server');
         return Product.fromJson(jsonDecode(res.body));
       } else {
         throw Exception('Update gagal: ${response.statusCode}');
@@ -392,5 +398,102 @@ class ApiService {
     return PaymentStatus.fromJson(
       response is Map ? response : response['data'],
     );
+  }
+
+  /// ================== PATCH ==================
+  Future<dynamic> _patchRequest(
+    String endpoint, {
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      final response = await http
+          .patch(
+            Uri.parse('$baseUrl$endpoint'),
+            headers: _headers(),
+            body: data != null ? jsonEncode(data) : null,
+          )
+          .timeout(Duration(seconds: timeout));
+
+      if (response.statusCode == 200) {
+        if (response.body.isEmpty) return null;
+        return jsonDecode(response.body);
+      } else {
+        throw Exception(
+          'Failed to patch data: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  // ================== USERS (Cashier Management) ==================
+  Future<List<UserModel>> getUsers() async {
+    final response = await _getRequest('/cashiers');
+    List<dynamic> data = response is List ? response : response['data'] ?? [];
+    return data.map((item) => UserModel.fromJson(item)).toList();
+  }
+
+  Future<UserModel> getUserById(int id) async {
+    final response = await _getRequest('/cashiers/$id');
+    return UserModel.fromJson(
+      response is Map ? response : response['data'],
+    );
+  }
+
+  Future<UserModel> createUser({
+    required String name,
+    required String email,
+    required String password,
+    String role = 'user',
+  }) async {
+    final response = await _postRequest('/cashiers', {
+      'name': name,
+      'email': email,
+      'password': password,
+      'role': role,
+    });
+    return UserModel.fromJson(
+      response is Map ? response : response['data'],
+    );
+  }
+
+  Future<UserModel> updateUser(
+    int id, {
+    String? name,
+    String? email,
+    String? password,
+  }) async {
+    final data = <String, dynamic>{};
+    if (name != null) data['name'] = name;
+    if (email != null) data['email'] = email;
+    if (password != null && password.isNotEmpty) data['password'] = password;
+
+    final response = await _putRequest('/cashiers/$id', data);
+    return UserModel.fromJson(
+      response is Map ? response : response['data'],
+    );
+  }
+
+  Future<UserModel> toggleUserStatus(int id) async {
+    final response = await _patchRequest('/cashiers/$id/toggle');
+    return UserModel.fromJson(
+      response is Map ? response : response['data'],
+    );
+  }
+
+  Future<void> deleteUser(int id) async {
+    final token = box.read('token');
+    final response = await http.delete(
+      Uri.parse('$baseUrl/cashiers/$id'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Gagal menghapus akun (${response.statusCode})');
+    }
   }
 }
